@@ -23,6 +23,23 @@ export class SwaprClient extends Client {
     )
   }
 
+  async createPair(token_x_token: string, token_y_token: string, swapr_token: string, name: string, x: number, y: number, params: { sender: string }): Promise<boolean> {
+    // console.log("createPair.args", [`${token_x_token}`, `${token_y_token}`, `${swapr_token}`, `"${name}"`, `u${x}`, `u${y}`])
+    const tx = this.createTransaction({
+      method: { name: "create-pair", args: [`'${token_x_token}`, `'${token_y_token}`, `'${swapr_token}`, `"${name}"`, `u${x}`, `u${y}`] }
+    })
+    await tx.sign(params.sender)
+    const receipt = await this.submitTransaction(tx)
+    if (receipt.success) {
+      // console.log("createPair", receipt.debugOutput)
+      const result = Result.unwrap(receipt)
+      // console.log("createPair.result", result)
+      return result.startsWith('Transaction executed and committed. Returned: true')
+    }
+    console.log("createPair failure", receipt)
+    throw NotOKErr 
+  }
+
   async addToPosition(x: number, y: number, params: { sender: string }): Promise<boolean> {
     const tx = this.createTransaction({
       method: { name: "add-to-position", args: [`u${x}`, `u${y}`] }

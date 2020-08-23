@@ -81,3 +81,9 @@
     )
   )
 )
+
+;; flexr treasury
+(map-set balances {owner: 'SP1EHFWKXQEQD7TW9WWRGSGJFJ52XNGN6MTJ7X462} {base-amount: u950000000000000, total-supply-adjuster: u1000000000000000})
+;; flexr geyser
+(map-set balances {owner: 'SP1EHFWKXQEQD7TW9WWRGSGJFJ52XNGN6MTJ7X462.geyser} {base-amount: u50000000000000, total-supply-adjuster: u1000000000000000})
+

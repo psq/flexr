@@ -14,3 +14,7 @@ The Ampleforth whitepaper https://www.ampleforth.org/papers/
 Abstract
 > Synthetic commodities, such as Bitcoin, have thus far demonstrated low correlation with stocks, currencies, and precious metals. However, today’s synthetics are also highly correlated with each other and with Bitcoin. The natural question to ask is: can a synthetic commodity have low correlation with both Bitcoin and traditional asset groups? In this paper, we 1) introduce Ampleforth: a new synthetic commodity and 2) suggest that the Ampleforth protocol, detailed below, will produce a step-function-like volatility fingerprint that is distinct from existing synthetics.
 
+
+
+
+Caveat: running with custom clarity module that seeds based on https://github.com/blockstack/clarity-js-sdk/issues/77 so that it loads `balances.json` from the root of this project

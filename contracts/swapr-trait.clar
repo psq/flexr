@@ -5,6 +5,6 @@
     (name () (response (buff 32) uint))
     (balance-of (principal) (response uint uint))
     (total-supply () (response uint uint))
-    (mint (principal uint) (response uint uint))
+    (mint (principal uint) (response bool uint))
   )
 )

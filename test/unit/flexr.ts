@@ -38,20 +38,25 @@ describe("full test suite", () => {
     "S02J6ZY48GV1EZ5V2V5RB9MP66SW86PYKKPVKG2CE",  // bob, u10 tokens of each
     "SZ2J6ZY48GV1EZ5V2V5RB9MP66SW86PYKKQ9H6DPR",  // zoe, no tokens
     "SP138CBPVKYBQQ480EZXJQK89HCHY32XBQ0T4BCCD",  // ?
-    "SP1EHFWKXQEQD7TW9WWRGSGJFJ52XNGN6MTJ7X462",
+    "SP1EHFWKXQEQD7TW9WWRGSGJFJ52XNGN6MTJ7X462",  // flexr treasury
     "SP30JX68J79SMTTN0D2KXQAJBFVYY56BZJEYS3X0B",
 
   ]
   const alice = addresses[0]
   const bob = addresses[1]
   const zoe = addresses[2]
+  const flexr_treasury = `${addresses[4]}`
+  const flexr_token = `S1G2081040G2081040G2081040G208105NK8PE5.flexr-token`
+  const swapr_token = `S1G2081040G2081040G2081040G208105NK8PE5.swapr-token`
+  const wrapr_token = `S1G2081040G2081040G2081040G208105NK8PE5.wrapr-token`
+
   // const swapr_contract = addresses[3]
 
-  const token1 = `${addresses[4]}.token1`
-  const token2 = `${addresses[4]}.token2`
-  const token3 = `${addresses[4]}.token3`
-  const pair1 = `${addresses[4]}.pair1`
-  const pair2 = `${addresses[4]}.pair2`
+  // const token1 = `${addresses[4]}.token1`
+  // const token2 = `${addresses[4]}.token2`
+  // const token3 = `${addresses[4]}.token3`
+  // const pair1 = `${addresses[4]}.pair1`
+  // const pair2 = `${addresses[4]}.pair2`
 
 
   before(async () => {
@@ -68,7 +73,7 @@ describe("full test suite", () => {
     wraprClient = new WraprClient("S1G2081040G2081040G2081040G208105NK8PE5", provider)
   })
 
-  it.only("should have a valid syntax", async () => {
+  it("should have a valid syntax", async () => {
     await src20TraitClient.checkContract()
     await src20TraitClient.deployContract() // deploy first
 
@@ -93,6 +98,64 @@ describe("full test suite", () => {
     await geyserClient.checkContract()
     await geyserClient.deployContract()
   })
+
+
+  describe("Full scenario", () => {
+    // let original_balances
+    // let alice_balances = {
+    //   x: 0,
+    //   y: 0,
+    // }
+    // let original_fees
+    // let swap_result
+    // const dx = 10000
+    // const dy = 4887
+
+    before(async () => {
+      console.log("wrapping for swapr")
+      // wrap stx into wrapr
+      assert(await wraprClient.wrap(50000000000000, {sender: flexr_treasury}))
+
+      console.log("creating swapr pair")
+      // creater flerx-swapr pair
+      assert(await swaprClient.createPair(flexr_token, wrapr_token, swapr_token, "flexr-wrapr", 50000000000000, 50000000000000, {sender: flexr_treasury}), "addToPosition did not return true")
+
+
+    })
+
+    it("Amount swapped should be correct", async () => {
+      // assert.equal(swap_result.x, dx)
+      // assert.equal(swap_result.y, dy)
+    })
+
+    it("Contract balances have been updated", async () => {
+      // const balances = await swaprClient.balances()
+      // assert.equal(balances.x, original_balances.x + dx - 5)
+      // assert.equal(balances.y, original_balances.y - dy)
+    })
+
+    it("Contract fees have been updated", async () => {
+      // const balance = await swaprClient.fees()
+      // assert.equal(balance.x, 5)
+      // assert.equal(balance.y, 0)
+    })
+
+    it("Alice token balances have been updated", async () => {
+      // const balance1 = await x_token_client.balanceOf(alice)
+      // const balance2 = await y_token_client.balanceOf(alice)
+      // assert.equal(balance1, alice_balances.x - dx)
+      // assert.equal(balance2, alice_balances.y + dy)
+    })
+
+    it("contract balances should be updated", async () => {
+      // const x_balance = await x_token_client.balanceOf(swapr_contract)
+      // const y_balance = await y_token_client.balanceOf(swapr_contract)
+      // assert.equal(x_balance, 500020 + dx)
+      // assert.equal(y_balance, 250010 - dy)
+    })
+  })
+
+
 
   // describe.skip("wrapr", () => {
   //   it("total supply should be 0", async () => {

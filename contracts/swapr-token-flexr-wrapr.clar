@@ -1,3 +1,5 @@
+(impl-trait .swapr-trait.swapr-trait)
+
 (define-fungible-token token)
 
 (define-constant no-acccess-err u30)
@@ -19,7 +21,7 @@
 )
 
 ;; can only be used by swapr main contract
-(define-public (mint (amount uint) (recipient principal))
+(define-public (mint (recipient principal) (amount uint))
   (if (is-eq contract-caller .swapr)
     (ft-mint? token amount recipient)
     (err no-acccess-err)

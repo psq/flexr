@@ -26,9 +26,10 @@ export class WraprClient extends Client {
     await tx.sign(params.sender)
     const receipt = await this.submitTransaction(tx)
     if (receipt.success) {
-      // console.log(receipt.debugOutput)
+      // console.log("wrap", receipt.debugOutput)
       const result = Result.unwrap(receipt)
-      return result.startsWith('Transaction executed and committed. Returned: true')
+      // console.log("result", result)
+      return result.startsWith('Transaction executed and committed')
     }
     throw new TransferError()
   }

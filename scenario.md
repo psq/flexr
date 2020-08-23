@@ -5,10 +5,10 @@ synthetic commodity (with elasticity)
 Intro on changes to swapr
 
 # Test scenario
-init contracts
-init flexr treasury with flexr and enough stx for funding swapr
-setup flexr-stx pair in swapr and fund from flexr treasury
-fund geyser from flexr treasury
+- init contracts
+- init flexr treasury with flexr and enough stx for funding swapr
+. setup flexr-stx pair in swapr and fund from flexr treasury
+- fund geyser from flexr treasury
 
 fund user[1-3] with stx
 user[1-3] buy flexr

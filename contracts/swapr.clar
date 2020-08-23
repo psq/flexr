@@ -64,7 +64,7 @@
     (fee-balance-y uint)
     (fee-to-address (optional principal))
     (swapr-token principal)
-    (name (buff 65))
+    (name (buff 32))
   )
 )
 
@@ -246,7 +246,7 @@
   (ok (map get-pair-contracts (var-get pairs-list)))
 )
 
-(define-public (create-pair (token-x-trait <src20-token>) (token-y-trait <src20-token>) (token-swapr-trait <swapr-token>) (pair-name (buff 65)) (x uint) (y uint))
+(define-public (create-pair (token-x-trait <src20-token>) (token-y-trait <src20-token>) (token-swapr-trait <swapr-token>) (pair-name (buff 32)) (x uint) (y uint))
   ;; TOOD(psq): add creation checks, then create map before proceeding to add-to-position
   ;; check neither x,y or y,x exists`
   (let ((name-x (unwrap-panic (contract-call? token-x-trait name))) (name-y (unwrap-panic (contract-call? token-y-trait name))))
