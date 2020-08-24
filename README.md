@@ -1,7 +1,7 @@
 # flexr
 A reimplementation of the Ampleforth token and its geyser
 
-Like Ampleforth, flexr adjusts its supply based on current demand.  If the price is lower than the target price, the supply contracts, and in the same fashion, if the price has increased too much, the supply will expand.  For long time holders, the daily planned rebase does not affect the amount they own, i.e. holding 2 token worth $1 or holding 1 token worth $2, or 4 tokens worth $0.5 does not change how much your tokens are worth.  It does provide an opportunity for short term traders to arbitrage the price around the rebase time.
+Like Ampleforth (AMPL), flexr adjusts its supply based on current demand.  If the price is lower than the target price, the supply contracts, and in the same fashion, if the price has increased too much, the supply will expand.  For long time holders, the daily planned rebase does not affect the amount they own, i.e. holding 2 token worth $1 or holding 1 token worth $2, or 4 tokens worth $0.5 does not change how much your tokens are worth.  It does provide an opportunity for short term traders to arbitrage the price around the rebase time.
 
 To minimize price movement, the rebase is done with a planned 30 days to reach the target price, but with no memory of what was done before, so each rebase adjusts the supply by 1/30 of what is needed.
 
@@ -26,7 +26,7 @@ Uncorrelated return streams is the holy grail of portfolio construction, both gr
 ### Example
 
 Supply, price and balances over time:
-|  | market cap| total supply    |price | alice adjusted balance | alice adjusted share | bob adjusted balance | bob adjusted share | supply ∆     | supply ∆ / smoothing |
+|  | market cap| total supply    |price | alice adjusted balance | alice adjusted share | bob adjusted balance | bob adjusted share | supply∆     | supply∆ / smoothing |
 |--|-----------|-----------|------|------------------|----------------|------------------|----------------|--------------|-------------|
 |1 | 1,300,000 | 1,000,000 |1.30  | 100,000      | 10.000%        |                  |                |   300,000 | 10,000 |
 |2 | 1,111,000 | 1,010,000 |1.10  | 101,000      | 10.000%        |                  |                |   101,000 | 3,366  |
@@ -35,7 +35,7 @@ Supply, price and balances over time:
 |5 | 1,211,986 | 1,009,988 |1.2   | 100,998      | 10.000%        | 49,833.3         | 4.934%         |  201,997  | 6,733  |  
 |6 | 1,118,394 | 1,016,722 |1.1   | 101,672      | 10.000%        | 50,165.6         | 4.934%         | 101,672   | 3,389  | 
 
-Bob gets 100,000 flexr at t=1 with an adjustment factor of 1,000,000 (the supply at t=1), and Alice gets 50,000 flexr with an ajdustment factor of 1,013,366.667 (the supply at t=3 when she gets her tokens)
+Bob gets 100,000 flexr at t=1 with an adjustment factor of 1,000,000 (the supply at t=1), and Alice gets 50,000 flexr with an ajdustment factor of 1,013,366.667 (the supply at t=3 when she gets her tokens).  See below for more on the [adjustement facto](#flexr-rebase-math)
 
 Note: there is no price change at t=4, so no rebase
 
@@ -55,14 +55,21 @@ swapr relied on tokens that implements the [SRC20 trait](./contracts/src20-trait
 
 ## Changes to swapr
 The original version of [swapr](https://github.com/psq/swapr) was relased for the first Blockstak Hackaton.
-- balances are no longer hardcoded, allowing for tokens with an elastic supply
-- the main swaprs contract can be used for multiple pairs by leveraging traits
-- liquidity provider now get a token for their share of liquidity they provide to a pair, allowing them to exchange it, or stake it (used by flexr's geyser!)
+
+In order to support flexr, it was necessary to introduce the following changes:
+- balances are no longer hardcoded, allowing for tokens with an elastic supply.  It looks like Uniswap v2 can also support this as it support AMPL.
+- the main swaprs contract can be used for multiple pairs by leveraging traits, although it is very likely that the final version will need one contract deployed per pair anyway, but this can be the exact same contract, not a contract with hardcoded pair addresses, so a net benefit
+- liquidity providers now get a token for their share of liquidity they provide to a pair, allowing them to exchange it with others, or stake it (used by flexr's geyser!).  Uniswap v2 supports this as well.
 
 ## The flexr token
 
 ### flexr rebase math
 During a rebase, everyone's balances get adjusted.  As this would not scale very well with a high number of holders, rebase calculate an adjustment factor to apply to apply to each balance, which gets finalized when exchanging the flexr token.
+
+```
+supply∆ = (current_price - price_target) * current_total_supply / price_target
+smoothed_supply∆ = supply∆ / 30
+``` 
 
 ## The flexr Oracle
 see https://docs.pro.coinbase.com/#oracle for details on how to do it, but still missing secp256k1 signature verification (https://github.com/blockstack/stacks-blockchain/issues/1134)
