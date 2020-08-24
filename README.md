@@ -30,7 +30,7 @@ TBD: add table with price and balance variations
 
 # The flexr ecosystem
 
-The [flexr token](#) relies on a new version of [swapr](#) for trading.  Liquidity providers on [swapr](#) can in turn stake their liquidity using a new swapr pair token on the [flexr geyser](#).  The longer you stake your liquidity token, the higher the reward you may get (in flexr token), up to 3x after 2 months.  The [flexr token](#) relies on an [Oracle](#) to learn about the price average over the past 24 hours to know whether, or how much to [rebase](#).
+The [flexr token](#the-flexr-token) implements the [SRC20 trait](#the-src20-token-trait) relies on a new version of [swapr](#changes-to-swapr) for trading.  Liquidity providers on [swapr](#changes-to-swapr) can in turn stake their liquidity using a new swapr pair token on the [flexr geyser](#the-flexr-geyser).  The longer you stake your liquidity token, the higher the reward you may get (in [flexr](#the-flexr-token) token), up to 3x after 2 months.  The [flexr token](#the-flexr-token#) relies on an [Oracle](#the-flexr-oracle) to learn about the price average over the past 24 hours to know whether, or how much to [rebase](#flexr-rebase-math).
 
 
 ## the SRC20 token trait
@@ -41,14 +41,17 @@ swapr relied on tokens that implements the [SRC20 trait](./contracts/src20-trait
 - getting the total supply
 
 ## Changes to swapr
-The original version of [swapr](https://github.com/psq/swapr)
+The original version of [swapr](https://github.com/psq/swapr) was relased for the first Blockstak Hackaton.
+- balances are no longer hardcoded, allowing for tokens with an elastic supply
+- the main swaprs contract can be used for multiple pairs by leveraging traits
+- liquidity provider now get a token for their share of liquidity they provide to a pair, allowing them to exchange it, or stake it (used by flexr's geyser!)
 
 ## The flexr token
 
 ### flexr rebase math
 During a rebase, everyone's balances get adjusted.  As this would not scale very well with a high number of holders, rebase calculate an adjustment factor to apply to apply to each balance, which gets finalized when exchanging the flexr token.
 
-## The Oracle
+## The flexr Oracle
 see https://docs.pro.coinbase.com/#oracle for details on how to do it, but still missing secp256k1 signature verification (https://github.com/blockstack/stacks-blockchain/issues/1134)
 
 ## The flexr geyser
