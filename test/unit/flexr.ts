@@ -33,6 +33,17 @@ describe("full test suite", () => {
   let swaprTokenClient: Client
   let wraprClient: Client
 
+  const prices = [
+    1_100_000,
+    1_150_000,
+    1_050_000,
+      950_000,
+      900_000,
+    1_000_000,
+    1_000_000,
+    1_000_000,
+  ]
+
   const addresses = [
     "SP2J6ZY48GV1EZ5V2V5RB9MP66SW86PYKKNRV9EJ7",  // alice, u20 tokens of each
     "S02J6ZY48GV1EZ5V2V5RB9MP66SW86PYKKPVKG2CE",  // bob, u10 tokens of each
@@ -73,32 +84,33 @@ describe("full test suite", () => {
     wraprClient = new WraprClient("S1G2081040G2081040G2081040G208105NK8PE5", provider)
   })
 
-  it("should have a valid syntax", async () => {
-    await src20TraitClient.checkContract()
-    await src20TraitClient.deployContract() // deploy first
+  describe("Check contracts", () => {
+    it("should have a valid syntax", async () => {
+      await src20TraitClient.checkContract()
+      await src20TraitClient.deployContract() // deploy first
 
-    await swaprTraitClient.checkContract()
-    await swaprTraitClient.deployContract() // deploy first
+      await swaprTraitClient.checkContract()
+      await swaprTraitClient.deployContract() // deploy first
 
-    await swaprClient.checkContract()
-    await swaprClient.deployContract()
+      await swaprClient.checkContract()
+      await swaprClient.deployContract()
 
-    await wraprClient.checkContract()
-    await wraprClient.deployContract()
+      await wraprClient.checkContract()
+      await wraprClient.deployContract()
 
-    await oracleClient.checkContract()
-    await oracleClient.deployContract()
+      await oracleClient.checkContract()
+      await oracleClient.deployContract()
 
-    await flexrClient.checkContract()
-    await flexrClient.deployContract()
+      await flexrClient.checkContract()
+      await flexrClient.deployContract()
 
-    await swaprTokenClient.checkContract()
-    await swaprTokenClient.deployContract() // deploy second
+      await swaprTokenClient.checkContract()
+      await swaprTokenClient.deployContract() // deploy second
 
-    await geyserClient.checkContract()
-    await geyserClient.deployContract()
+      await geyserClient.checkContract()
+      await geyserClient.deployContract()
+    })
   })
-
 
   describe("Full scenario", () => {
     // let original_balances
@@ -114,87 +126,66 @@ describe("full test suite", () => {
     before(async () => {
       // wrap stx into wrapr
       console.log("======>  wrap.treasury")
-      assert(await wraprClient.wrap(50000000000000, {sender: flexr_treasury}))
+      assert(await wraprClient.wrap(50_000_000_000_000, {sender: flexr_treasury}))
 
       // create flerx-swapr pair
       console.log("======>  createPair.treasury")
-      assert(await swaprClient.createPair(flexr_token, wrapr_token, swapr_token, "flexr-wrapr", 50000000000000, 50000000000000, {sender: flexr_treasury}), "createPair did not return true")
+      assert(await swaprClient.createPair(flexr_token, wrapr_token, swapr_token, "flexr-wrapr", 50_000_000_000_000, 50_000_000_000_000, {sender: flexr_treasury}), "createPair did not return true")
 
 
       // Alice wraps STX
       console.log("======>  wrap.alice")
-      assert(await wraprClient.wrap(100000000000, {sender: alice}))
+      assert(await wraprClient.wrap(100_000_000_000, {sender: alice}))
       // Alice gets some FLEXR
       console.log("======>  swapExactYforX.alice")
-      assert(await swaprClient.swapYforExactX(flexr_token, wrapr_token, 40000000000, {sender: alice}))
+      assert(await swaprClient.swapYforExactX(flexr_token, wrapr_token, 40_000_000_000, {sender: alice}))
       // Alice add a position on swapr's FLEXR-WRAPR pair
       console.log("======>  addToPosition.alice")
-      assert(await swaprClient.addToPosition(flexr_token, wrapr_token, swapr_token, 40000000000, 40000000000, {sender: alice}), "addToPosition did not return true")
+      assert(await swaprClient.addToPosition(flexr_token, wrapr_token, swapr_token, 40_000_000_000, 40_000_000_000, {sender: alice}), "addToPosition did not return true")
       // Alice stakes her position on geyser
       console.log("======>  stake.alice")
-      assert(await geyserClient.stake(40000000000, {sender: alice}), "stake did not return true")
+      assert(await geyserClient.stake(40_000_000_000, {sender: alice}), "stake did not return true")
 
       // Bob wraps STX
       console.log("======>  wrap.bob")
-      assert(await wraprClient.wrap(50000000000, {sender: bob}))
+      assert(await wraprClient.wrap(50_000_000_000, {sender: bob}))
 
       // Zoe wraps STX
       console.log("======>  wrap.zoe")
-      assert(await wraprClient.wrap(50000000000, {sender: zoe}))
+      assert(await wraprClient.wrap(50_000_000_000, {sender: zoe}))
       // Zoe gets a lot of FLEXR
       console.log("======>  wrap.zoe")
-      assert(await swaprClient.swapExactYforX(flexr_token, wrapr_token, 50000000000, {sender: zoe}))
+      assert(await swaprClient.swapExactYforX(flexr_token, wrapr_token, 50_000_000_000, {sender: zoe}))
 
       for (let i = 0; i < 5; i++) {
+        console.log(`======>  swapExactYforX.bob - round ${i}`)
+
         // Bob exhanges WRAPR for FLEXR (back and forth 5x)
         console.log("======>  swapExactYforX.bob")
-        assert(await swaprClient.swapExactYforX(flexr_token, wrapr_token, 2000000000, {sender: bob}))
+        assert(await swaprClient.swapExactYforX(flexr_token, wrapr_token, 2_000_000_000, {sender: bob}))
         // Zoe exhanges FLEXR for WRAPR (back and forth 5x)
         console.log("======>  swapExactXforY.zoe")
-        assert(await swaprClient.swapExactXforY(flexr_token, wrapr_token, 2000000000, {sender: zoe}))
+        assert(await swaprClient.swapExactXforY(flexr_token, wrapr_token, 2_000_000_000, {sender: zoe}))
 
-        // TODO(psq): oracleClient.updatePrice
-        // TODO(psq): flexrClient.rebase
+        console.log("======>  updatePrice.zoe")
+        assert(await oracleClient.updatePrice(prices[i], {sender: zoe}))
+        console.log(`======>  rebase.zoe - ${prices[i]}`)
+        assert(await flexrClient.rebase({sender: zoe}))
       }
-
 
       // Alice collects her reward on geyser
       console.log("======>  unstake.alice")
       assert(await geyserClient.unstake({sender: alice}), "stake did not return true")
+    })
+
+    it("check balances after running scenario", async () => {
       // Alice checks the fees she collected
+      assert.equal(await flexrClient.balanceOf(alice, {sender: alice}), 960_000)
 
+      // total FLEXR supply
+      assert.equal(await flexrClient.totalSupply({sender: alice}), 1_014_873_127_537_500) // starting value: 1_000_000_000_000_000
     })
 
-    it("Amount swapped should be correct", async () => {
-      // assert.equal(swap_result.x, dx)
-      // assert.equal(swap_result.y, dy)
-    })
-
-    it("Contract balances have been updated", async () => {
-      // const balances = await swaprClient.balances()
-      // assert.equal(balances.x, original_balances.x + dx - 5)
-      // assert.equal(balances.y, original_balances.y - dy)
-    })
-
-    it("Contract fees have been updated", async () => {
-      // const balance = await swaprClient.fees()
-      // assert.equal(balance.x, 5)
-      // assert.equal(balance.y, 0)
-    })
-
-    it("Alice token balances have been updated", async () => {
-      // const balance1 = await x_token_client.balanceOf(alice)
-      // const balance2 = await y_token_client.balanceOf(alice)
-      // assert.equal(balance1, alice_balances.x - dx)
-      // assert.equal(balance2, alice_balances.y + dy)
-    })
-
-    it("contract balances should be updated", async () => {
-      // const x_balance = await x_token_client.balanceOf(swapr_contract)
-      // const y_balance = await y_token_client.balanceOf(swapr_contract)
-      // assert.equal(x_balance, 500020 + dx)
-      // assert.equal(y_balance, 250010 - dy)
-    })
   })
 
 

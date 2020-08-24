@@ -5,13 +5,13 @@
 (define-constant err-12 u12)
 (define-constant err-13 u13)
 
-(define-constant target-price u1000000)
+(define-constant target-price 1000000)
 (define-constant rebase-lag u10)  ;; started with 30 then moved to 10
 (define-constant deviation-threshold-high u1050000)
 (define-constant deviation-threshold-low u950000)
-(define-constant rebalance-period u144)
+(define-constant rebalance-period u3)  ;; TODO(psq): for testing only, real value should be u144 (1 day)
 
-(define-data-var supply uint (* u1000000000 u1000000))
+(define-data-var supply int (* 1000000000 target-price))
 (define-data-var last-rebase-height uint u0)
 
 (define-map balances
@@ -20,7 +20,7 @@
 )
 
 (define-private (balance-set (recipient principal) (amount uint))
-  (map-set balances {owner: recipient} {base-amount: amount, total-supply-adjuster: (var-get supply)})
+  (map-set balances {owner: recipient} {base-amount: amount, total-supply-adjuster: (to-uint (var-get supply))})
 )
 
 (define-public (transfer (recipient principal) (amount uint))
@@ -55,7 +55,7 @@
 (define-public (balance-of (recipient principal))
   (let ((balance (map-get? balances {owner: recipient})))
     (if (is-some balance)
-      (ok (/ (* (var-get supply) (unwrap-panic (get base-amount balance))) (unwrap-panic (get total-supply-adjuster balance))))
+      (ok (/ (* (to-uint (var-get supply)) (unwrap-panic (get base-amount balance))) (unwrap-panic (get total-supply-adjuster balance))))
       (ok u0)
     )
   )
@@ -63,7 +63,7 @@
 
 ;; ;; returns the total number of tokens
 (define-public (total-supply)
-  (ok (var-get supply))
+  (ok (to-uint (var-get supply)))
 )
 
 ;; returns the token name
@@ -86,9 +86,14 @@
 
 (define-private (run-rebase)
   (let ((current-price-data (contract-call? .oracle get-price)))
+    (print "qqqq")
+    (print current-price-data)
     (let ((current-price (get price current-price-data)))
-      (let ((supply-delta (/ (* (- current-price target-price) (var-get supply)) target-price)))
-        (let ((supply-delta-smoothed (/ supply-delta rebase-lag)))
+      (print current-price)
+      (let ((supply-delta (/ (* (- (to-int current-price) target-price) (var-get supply)) target-price)))
+        (print supply-delta)
+        (let ((supply-delta-smoothed (/ supply-delta (to-int rebase-lag))))
+          (print supply-delta-smoothed)
           (var-set supply (+ (var-get supply) supply-delta-smoothed))
         )
       )

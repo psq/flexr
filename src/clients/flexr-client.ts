@@ -37,12 +37,12 @@ export class FlexrClient extends Client {
 
   async rebase(params: { sender: string }): Promise<boolean> {
     const tx = this.createTransaction({
-      method: { name: "transfer", args: [] }
+      method: { name: "rebase", args: [] }
     })
     await tx.sign(params.sender)
     const receipt = await this.submitTransaction(tx)
     if (receipt.success) {
-      console.log("debugOutput.rebase", receipt.debugOutput)
+      // console.log("debugOutput.rebase", receipt.debugOutput)
       const result = Result.unwrap(receipt)
       return result.startsWith('Transaction executed and committed. Returned: true')
     }
@@ -61,5 +61,15 @@ export class FlexrClient extends Client {
     return Result.unwrapUInt(receipt)
   }
 
+  async totalSupply(): Promise<number> {
+    const query = this.createQuery({
+      method: {
+        name: 'total-supply',
+        args: [``],
+      },
+    })
+    const receipt = await this.submitQuery(query)
+    return Result.unwrapUInt(receipt)
+  }
 
 }

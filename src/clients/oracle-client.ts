@@ -23,15 +23,16 @@ export class OracleClient extends Client {
 
   async updatePrice(price: number, params: { sender: string }): Promise<boolean> {
     const tx = this.createTransaction({
-      method: { name: "transfer", args: [`'${price}`] }
+      method: { name: "update-price", args: [`u${price}`] }
     })
     await tx.sign(params.sender)
     const receipt = await this.submitTransaction(tx)
     if (receipt.success) {
-      // console.log("debugOutput", receipt.debugOutput)
+      // console.log("updatePrice.debugOutput", receipt.debugOutput)
       const result = Result.unwrap(receipt)
       return result.startsWith('Transaction executed and committed. Returned: true')
     }
+    console.log("updatePrice", receipt)
     throw TransferError
   }
 
