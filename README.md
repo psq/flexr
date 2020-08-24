@@ -21,21 +21,23 @@ Abstract
 > Synthetic commodities, such as Bitcoin, have thus far demonstrated low correlation with stocks, currencies, and precious metals. However, today’s synthetics are also highly correlated with each other and with Bitcoin. The natural question to ask is: can a synthetic commodity have low correlation with both Bitcoin and traditional asset groups? In this paper, we 1) introduce Ampleforth: a new synthetic commodity and 2) suggest that the Ampleforth protocol, detailed below, will produce a step-function-like volatility fingerprint that is distinct from existing synthetics.
 
 ### Why non correlation is important
-TBD
-
-|  | market cap| total supply    |price | alice adjusted balance | alice adjusted share | bob adjusted balance | bob adjusted share | supply ∆     | supply ∆ / smoothing |
-|--|-----------|-----------|------|------------------|----------------|------------------|----------------|--------------|-------------|
-|1 | 1,300,000 | 1,000,000 |1.30  | 100,000      | 10.000%        |                  |                |   300,000 | 10,000   |
-|2 | 1,111,000 | 1,010,000 |1.10  | 101,000      | 10.000%        |                  |                |   101,000 | 3,366    |
-|3 | 912,030   | 1,013,366 |0.90  | 101,336      | 10.000%        | 50,000.0         | 4.934%         |  -101336 | -3,377   | 
-|4 | 1,009,988 | 1,009,988 |1     | 100,998      | 10.000%        | 49,833.3         | 4.934%         |  0       | 0       | no change!
-|5 | 1,211,986 | 1,009,988 |1.2   | 100,998      | 10.000%        | 49,833.3         | 4.934%         |  201,997 | 6,733   |  
-|6 | 1,118,394 | 1,016,722 |1.1   | 101,672      | 10.000%        | 50,165.6         | 4.934%         | 101,672  | 3,389   | 
-
+Uncorrelated return streams is the holy grail of portfolio construction, both greatly reducing drawdowns (because one asset zigs when other zags), but potentially providing a total return greater than the average of the weighted returns (because your money has to work less hards as you did not lose as much, i.e. if you lose 50%, you need a gain of 100% to break even).
 
 ### Example
 
-TBD: add table with price and balance variations
+Supply, price and balances over time:
+|  | market cap| total supply    |price | alice adjusted balance | alice adjusted share | bob adjusted balance | bob adjusted share | supply ∆     | supply ∆ / smoothing |
+|--|-----------|-----------|------|------------------|----------------|------------------|----------------|--------------|-------------|
+|1 | 1,300,000 | 1,000,000 |1.30  | 100,000      | 10.000%        |                  |                |   300,000 | 10,000 |
+|2 | 1,111,000 | 1,010,000 |1.10  | 101,000      | 10.000%        |                  |                |   101,000 | 3,366  |
+|3 | 912,030   | 1,013,366 |0.90  | 101,336      | 10.000%        | 50,000.0         | 4.934%         |  -101336  | -3,377 | 
+|4 | 1,009,988 | 1,009,988 |1     | 100,998      | 10.000%        | 49,833.3         | 4.934%         |  0        | 0      |
+|5 | 1,211,986 | 1,009,988 |1.2   | 100,998      | 10.000%        | 49,833.3         | 4.934%         |  201,997  | 6,733  |  
+|6 | 1,118,394 | 1,016,722 |1.1   | 101,672      | 10.000%        | 50,165.6         | 4.934%         | 101,672   | 3,389  | 
+
+Bob gets 100,000 flexr at t=1 with an adjustment factor of 1,000,000 (the supply at t=1), and Alice gets 50,000 flexr with an ajdustment factor of 1,013,366.667 (the supply at t=3 when she gets her tokens)
+
+Note: there is no price change at t=4, so no rebase
 
 # The flexr ecosystem
 
