@@ -22,7 +22,7 @@ x user3 tries rebase arbitrage
 - user1 withdraws reward from geyser and checks earnings
 x user1 withdraw liquity and checks earnings 
 
-# show scenario run output
+# Scenario run output
 ```
 initialize balances.json /var/folders/10/vfzc9gqn6cs8d2zldp6v83400000gp/T/blockstack-local-1598255557-djwmpi.db
     Check contracts
@@ -76,8 +76,3 @@ Challenges
 - advance block to any block
 - initial balances using clarity js sdk (hack)
 - support for token with varying balance, can not use `ft-token`, would require new post conditions (check variable value, check map values, ...)
-
-## TODOs
-- create/update clients
-- setup STX balances (or use a fake token)
-x advance blocks enough to allow rebalance/oracle to work as expected (change constants instead)
