@@ -35,6 +35,21 @@ export class FlexrClient extends Client {
     throw TransferError
   }
 
+  async rebase(params: { sender: string }): Promise<boolean> {
+    const tx = this.createTransaction({
+      method: { name: "transfer", args: [] }
+    })
+    await tx.sign(params.sender)
+    const receipt = await this.submitTransaction(tx)
+    if (receipt.success) {
+      console.log("debugOutput.rebase", receipt.debugOutput)
+      const result = Result.unwrap(receipt)
+      return result.startsWith('Transaction executed and committed. Returned: true')
+    }
+    console.log("rebase", receipt)
+    throw TransferError
+  }
+
   async balanceOf(owner: string): Promise<number> {
     const query = this.createQuery({
       method: {

@@ -5,7 +5,14 @@
 (define-constant no-acccess-err u30)
 
 (define-public (transfer (recipient principal) (amount uint))
-  (ft-transfer? token amount tx-sender recipient)
+  (begin
+    (print "oooo")
+    (print tx-sender)
+    (print recipient)
+    (print amount)
+    (print (ft-get-balance token tx-sender))
+    (print (ft-transfer? token amount tx-sender recipient))
+  )
 )
 
 (define-public (name)

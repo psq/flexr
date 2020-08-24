@@ -1,4 +1,4 @@
-(define-constant err-not-white-listed u1)
+(define-constant err-not-white-listed u51)
 
 (define-data-var last-price uint u0)
 (define-data-var last-block uint u0)

@@ -7,10 +7,11 @@ Intro on changes to swapr
 # Test scenario
 - init contracts
 - init flexr treasury with flexr and enough stx for funding swapr
-. setup flexr-stx pair in swapr and fund from flexr treasury
+- setup flexr-stx pair in swapr and fund from flexr treasury
 - fund geyser from flexr treasury
 
 fund user[1-3] with stx
+user[1-3] wrap stx
 user[1-3] buy flexr
 user[1-2] provide liquidity to the flexr-stx pair
 user1 stakes his flexr-stx pair in the geyser
@@ -27,5 +28,6 @@ Challenge
 
 
 ## TODOs
-create/update clients
-setup STX balances (or use a fake token)
+. create/update clients
+- setup STX balances (or use a fake token)
+? advance blocks enough to allow rebalance/oracle to work as expected

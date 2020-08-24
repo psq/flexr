@@ -31,7 +31,7 @@ export class SwaprClient extends Client {
     await tx.sign(params.sender)
     const receipt = await this.submitTransaction(tx)
     if (receipt.success) {
-      // console.log("createPair", receipt.debugOutput)
+      console.log("createPair", receipt.debugOutput)
       const result = Result.unwrap(receipt)
       // console.log("createPair.result", result)
       return result.startsWith('Transaction executed and committed. Returned: true')
@@ -40,20 +40,25 @@ export class SwaprClient extends Client {
     throw NotOKErr 
   }
 
-  async addToPosition(x: number, y: number, params: { sender: string }): Promise<boolean> {
+  async addToPosition(token_x_token: string, token_y_token: string, swapr_token: string, x: number, y: number, params: { sender: string }): Promise<boolean> {
     const tx = this.createTransaction({
-      method: { name: "add-to-position", args: [`u${x}`, `u${y}`] }
+      method: { name: "add-to-position", args: [`'${token_x_token}`, `'${token_y_token}`, `'${swapr_token}`, `u${x}`, `u${y}`] }
     })
     await tx.sign(params.sender)
     const receipt = await this.submitTransaction(tx)
-    // console.log(receipt.debugOutput)
-    const result = Result.unwrap(receipt)
-    return result.startsWith('Transaction executed and committed. Returned: true')
+    if (receipt.success) {
+      console.log(receipt.debugOutput)
+      const result = Result.unwrap(receipt)
+      return result.startsWith('Transaction executed and committed. Returned: true')
+    }
+    console.log("addToPosition failure", receipt)
+    throw NotOKErr
+    
   }
 
-  async reducePosition(percent: number, params: { sender: string }): Promise<Object> {
+  async reducePosition(token_x_token: string, token_y_token: string, swapr_token: string, percent: number, params: { sender: string }): Promise<Object> {
     const tx = this.createTransaction({
-      method: { name: "reduce-position", args: [`u${percent}`] }
+      method: { name: "reduce-position", args: [`'${token_x_token}`, `'${token_y_token}`, `'${swapr_token}`, `u${percent}`] }
     })
     await tx.sign(params.sender)
     const receipt = await this.submitTransaction(tx)
@@ -68,9 +73,9 @@ export class SwaprClient extends Client {
     throw new NotOKErr()
   }
 
-  async swapExactXforY(dx: number, params: { sender: string }): Promise<Object> {
+  async swapExactXforY(token_x_token: string, token_y_token: string, dx: number, params: { sender: string }): Promise<Object> {
     const tx = this.createTransaction({
-      method: { name: "swap-exact-x-for-y", args: [`u${dx}`] }
+      method: { name: "swap-exact-x-for-y", args: [`'${token_x_token}`, `'${token_y_token}`, `u${dx}`] }
     })
     await tx.sign(params.sender)
     const receipt = await this.submitTransaction(tx)
@@ -85,9 +90,9 @@ export class SwaprClient extends Client {
     throw new NotOKErr()
   }
 
-  async swapXforExactY(dy: number, params: { sender: string }): Promise<Object> {
+  async swapXforExactY(token_x_token: string, token_y_token: string, dy: number, params: { sender: string }): Promise<Object> {
     const tx = this.createTransaction({
-      method: { name: "swap-x-for-exact-y", args: [`u${dy}`] }
+      method: { name: "swap-x-for-exact-y", args: [`'${token_x_token}`, `'${token_y_token}`, `u${dy}`] }
     })
     await tx.sign(params.sender)
     const receipt = await this.submitTransaction(tx)
@@ -102,9 +107,9 @@ export class SwaprClient extends Client {
     throw new NotOKErr()
   }
 
-  async swapExactYforX(dy: number, params: { sender: string }): Promise<Object> {
+  async swapExactYforX(token_x_token: string, token_y_token: string, dy: number, params: { sender: string }): Promise<Object> {
     const tx = this.createTransaction({
-      method: { name: "swap-exact-y-for-x", args: [`u${dy}`] }
+      method: { name: "swap-exact-y-for-x", args: [`'${token_x_token}`, `'${token_y_token}`, `u${dy}`] }
     })
     await tx.sign(params.sender)
     const receipt = await this.submitTransaction(tx)
@@ -119,9 +124,9 @@ export class SwaprClient extends Client {
     throw new NotOKErr()
   }
 
-  async swapYforExactX(dx: number, params: { sender: string }): Promise<Object> {
+  async swapYforExactX(token_x_token: string, token_y_token: string, dx: number, params: { sender: string }): Promise<Object> {
     const tx = this.createTransaction({
-      method: { name: "swap-y-for-exact-x", args: [`u${dx}`] }
+      method: { name: "swap-y-for-exact-x", args: [`'${token_x_token}`, `'${token_y_token}`, `u${dx}`] }
     })
     await tx.sign(params.sender)
     const receipt = await this.submitTransaction(tx)
@@ -136,11 +141,11 @@ export class SwaprClient extends Client {
     throw new NotOKErr()
   }
 
-  async positionOf(owner: string): Promise<number> {
+  async positionOf(token_x_token: string, token_y_token: string, owner: string): Promise<number> {
     const query = this.createQuery({
       method: {
         name: 'get-position-of',
-        args: [`'${owner}`],
+        args: [`'${token_x_token}`, `'${token_y_token}`, `'${owner}`],
       },
     })
     const receipt = await this.submitQuery(query)
@@ -151,7 +156,7 @@ export class SwaprClient extends Client {
     const query = this.createQuery({
       method: {
         name: 'get-balances',
-        args: [],
+        args: [`'${token_x_token}`, `'${token_y_token}`],
       },
     })
     const receipt = await this.submitQuery(query)

@@ -21,25 +21,41 @@ export class GeyserClient extends Client {
     )
   }
 
-  async transfer(recipient: string, amount: number, params: { sender: string }): Promise<boolean> {
+  async stake(amount: number, params: { sender: string }): Promise<boolean> {
     const tx = this.createTransaction({
-      method: { name: "transfer", args: [`'${recipient}`, `u${amount}`] }
+      method: { name: "stake", args: [`u${amount}`] }
     })
     await tx.sign(params.sender)
     const receipt = await this.submitTransaction(tx)
     if (receipt.success) {
-      // console.log("debugOutput", receipt.debugOutput)
+      console.log("debugOutput", receipt.debugOutput)
       const result = Result.unwrap(receipt)
       return result.startsWith('Transaction executed and committed. Returned: true')
     }
+    console.log("stake", receipt)
     throw TransferError
   }
 
-  async balanceOf(owner: string): Promise<number> {
+  async unstake(params: { sender: string }): Promise<boolean> {
+    const tx = this.createTransaction({
+      method: { name: "unstake", args: [] }
+    })
+    await tx.sign(params.sender)
+    const receipt = await this.submitTransaction(tx)
+    if (receipt.success) {
+      console.log("debugOutput", receipt.debugOutput)
+      const result = Result.unwrap(receipt)
+      return result.startsWith('Transaction executed and committed. Returned: true')
+    }
+    console.log("unstake", receipt)
+    throw TransferError
+  }
+
+  async totalSupply(owner: string): Promise<number> {
     const query = this.createQuery({
       method: {
-        name: 'balance-of',
-        args: [`'${owner}`],
+        name: 'total-supply',
+        args: [],
       },
     })
     const receipt = await this.submitQuery(query)

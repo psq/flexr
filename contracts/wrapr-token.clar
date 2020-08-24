@@ -7,7 +7,8 @@
 ;; get the token balance of owner
 (define-read-only (balance-of (owner principal))
   (begin
-    (ok (ft-get-balance wrapped-token owner))
+    (print "mmmm")
+    (ok (print (ft-get-balance wrapped-token owner)))
   )
 )
 
@@ -32,6 +33,7 @@
       )
       (begin
         (var-set supply (+ (var-get supply) amount))
+        (print "aaaa")
         (print amount)
         (print (var-get supply))
         (ok (list amount (var-get supply)))
@@ -47,6 +49,7 @@
 ;; burns unwrapped token (well, can't burn yet, so will forever increase, good thing there is no limit)
 (define-public (unwrap (amount uint))
   (let ((caller tx-sender) (contract-address (as-contract tx-sender)))
+    (print "bbbb")
     (print contract-address)
     (print amount)
     (if
@@ -70,10 +73,12 @@
 ;; just a wrapper to satisfy the `<can-transfer-token>`
 (define-public (transfer (recipient principal) (amount uint))
   (begin
+    (print "cccc")
     (print tx-sender)
     (print recipient)
     (print amount)
-    (ft-transfer? wrapped-token amount tx-sender recipient)
+    (print (ft-get-balance wrapped-token tx-sender))
+    (print (ft-transfer? wrapped-token amount tx-sender recipient))
   )
 )
 

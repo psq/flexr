@@ -27,11 +27,25 @@
   (let ((balance-sender (unwrap-panic (balance-of tx-sender))) (balance-recipient (unwrap-panic (balance-of recipient))))
     (if (>= balance-sender amount)
       (begin
+        (print "jjjj")
+        (print balance-sender)
+        (print balance-recipient)
+        (print amount)
+        (print tx-sender)
+        (print recipient)
         (balance-set tx-sender (- balance-sender amount))
         (balance-set recipient (+ balance-recipient amount))
         (ok true)
       )
-      (err balance-too-low-err)
+      (begin
+        (print "kkkk")
+        (print balance-sender)
+        (print balance-recipient)
+        (print amount)
+        (print tx-sender)
+        (print recipient)
+        (err balance-too-low-err)
+      )
     )
   )
 )
@@ -39,7 +53,7 @@
 ;; returns the balance of `recipient`
 ;; total-supply * base-amount / total-supply-adjuster
 (define-public (balance-of (recipient principal))
-  (let ((balance (map-get? balances {owner: tx-sender})))
+  (let ((balance (map-get? balances {owner: recipient})))
     (if (is-some balance)
       (ok (/ (* (var-get supply) (unwrap-panic (get base-amount balance))) (unwrap-panic (get total-supply-adjuster balance))))
       (ok u0)
@@ -85,5 +99,5 @@
 ;; flexr treasury
 (map-set balances {owner: 'SP1EHFWKXQEQD7TW9WWRGSGJFJ52XNGN6MTJ7X462} {base-amount: u950000000000000, total-supply-adjuster: u1000000000000000})
 ;; flexr geyser
-(map-set balances {owner: 'SP1EHFWKXQEQD7TW9WWRGSGJFJ52XNGN6MTJ7X462.geyser} {base-amount: u50000000000000, total-supply-adjuster: u1000000000000000})
+(map-set balances {owner: 'S1G2081040G2081040G2081040G208105NK8PE5.geyser} {base-amount: u50000000000000, total-supply-adjuster: u1000000000000000})
 

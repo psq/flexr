@@ -112,14 +112,56 @@ describe("full test suite", () => {
     // const dy = 4887
 
     before(async () => {
-      console.log("wrapping for swapr")
       // wrap stx into wrapr
+      console.log("======>  wrap.treasury")
       assert(await wraprClient.wrap(50000000000000, {sender: flexr_treasury}))
 
-      console.log("creating swapr pair")
-      // creater flerx-swapr pair
-      assert(await swaprClient.createPair(flexr_token, wrapr_token, swapr_token, "flexr-wrapr", 50000000000000, 50000000000000, {sender: flexr_treasury}), "addToPosition did not return true")
+      // create flerx-swapr pair
+      console.log("======>  createPair.treasury")
+      assert(await swaprClient.createPair(flexr_token, wrapr_token, swapr_token, "flexr-wrapr", 50000000000000, 50000000000000, {sender: flexr_treasury}), "createPair did not return true")
 
+
+      // Alice wraps STX
+      console.log("======>  wrap.alice")
+      assert(await wraprClient.wrap(100000000000, {sender: alice}))
+      // Alice gets some FLEXR
+      console.log("======>  swapExactYforX.alice")
+      assert(await swaprClient.swapYforExactX(flexr_token, wrapr_token, 40000000000, {sender: alice}))
+      // Alice add a position on swapr's FLEXR-WRAPR pair
+      console.log("======>  addToPosition.alice")
+      assert(await swaprClient.addToPosition(flexr_token, wrapr_token, swapr_token, 40000000000, 40000000000, {sender: alice}), "addToPosition did not return true")
+      // Alice stakes her position on geyser
+      console.log("======>  stake.alice")
+      assert(await geyserClient.stake(40000000000, {sender: alice}), "stake did not return true")
+
+      // Bob wraps STX
+      console.log("======>  wrap.bob")
+      assert(await wraprClient.wrap(50000000000, {sender: bob}))
+
+      // Zoe wraps STX
+      console.log("======>  wrap.zoe")
+      assert(await wraprClient.wrap(50000000000, {sender: zoe}))
+      // Zoe gets a lot of FLEXR
+      console.log("======>  wrap.zoe")
+      assert(await swaprClient.swapExactYforX(flexr_token, wrapr_token, 50000000000, {sender: zoe}))
+
+      for (let i = 0; i < 5; i++) {
+        // Bob exhanges WRAPR for FLEXR (back and forth 5x)
+        console.log("======>  swapExactYforX.bob")
+        assert(await swaprClient.swapExactYforX(flexr_token, wrapr_token, 2000000000, {sender: bob}))
+        // Zoe exhanges FLEXR for WRAPR (back and forth 5x)
+        console.log("======>  swapExactXforY.zoe")
+        assert(await swaprClient.swapExactXforY(flexr_token, wrapr_token, 2000000000, {sender: zoe}))
+
+        // TODO(psq): oracleClient.updatePrice
+        // TODO(psq): flexrClient.rebase
+      }
+
+
+      // Alice collects her reward on geyser
+      console.log("======>  unstake.alice")
+      assert(await geyserClient.unstake({sender: alice}), "stake did not return true")
+      // Alice checks the fees she collected
 
     })
 

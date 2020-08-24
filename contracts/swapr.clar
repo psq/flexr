@@ -8,16 +8,16 @@
 (use-trait swapr-token 'S1G2081040G2081040G2081040G208105NK8PE5.swapr-trait.swapr-trait)
 
 (define-constant contract-owner 'SZ2J6ZY48GV1EZ5V2V5RB9MP66SW86PYKKQ9H6DPR)
-(define-constant no-liquidity-err (err u1))
-(define-constant transfer-failed-err (err u2))
-(define-constant not-owner-err (err u3))
-(define-constant no-fee-to-address-err (err u4))
-(define-constant invalid-pair-err (err u5))
-(define-constant no-such-position-err (err u6))
-(define-constant balance-too-low-err (err u7))
-(define-constant too-many-pairs-err (err u8))
-(define-constant pair-already-exists-err (err u9))
-(define-constant wrong-token-err (err u10))
+(define-constant no-liquidity-err (err u61))
+(define-constant transfer-failed-err (err u62))
+(define-constant not-owner-err (err u63))
+(define-constant no-fee-to-address-err (err u64))
+(define-constant invalid-pair-err (err u65))
+(define-constant no-such-position-err (err u66))
+(define-constant balance-too-low-err (err u67))
+(define-constant too-many-pairs-err (err u68))
+(define-constant pair-already-exists-err (err u69))
+(define-constant wrong-token-err (err u70))
 
 ;; for future use, or debug
 (define-constant e10-err (err u20))
@@ -136,14 +136,20 @@
   (ok (get shares-total (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
 )
 
-(define-private (balance (token-trait <src20-token>) (owner principal))
-  (unwrap-panic (contract-call? token-trait balance-of owner))
+;; TODO(psq): only works if a token is in only one pair, to make this work, needs a new instance of the contract per pair at a different address
+;; which would remove the need for a separate token, as swapr can be its own token
+(define-private (balance (token-trait <src20-token>))
+  (begin
+    (print "llll")
+    (print (contract-of token-trait))
+    (print (unwrap-panic (contract-call? token-trait balance-of (as-contract tx-sender))))
+  )
 )
 
 (define-public (get-balances-of (token-x-trait <src20-token>) (token-y-trait <src20-token>) (owner principal))
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
     (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
-      (let ((x (balance token-x-trait tx-sender)) (y (balance token-y-trait tx-sender)) (shares-total (get shares-total pair)) (shares (shares-of token-x token-y owner)))
+      (let ((x (balance token-x-trait)) (y (balance token-y-trait)) (shares-total (get shares-total pair)) (shares (shares-of token-x token-y owner)))
         (if (> shares-total u0)
           (ok (list (/ (* x shares) shares-total) (/ (* y shares) shares-total)))  ;; less precision loss doing * first
           no-liquidity-err  ;; no liquidity
@@ -182,7 +188,7 @@
 (define-public (get-balances (token-x-trait <src20-token>) (token-y-trait <src20-token>))
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
     (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
-      (ok (list (balance token-x-trait (as-contract tx-sender)) (balance token-y-trait (as-contract tx-sender))))
+      (ok (list (balance token-x-trait) (balance token-y-trait)))
     )
   )
 )
@@ -206,7 +212,7 @@
                     (increase-shares token-x token-y tx-sender x)
                     x
                   )
-                  (let ((new-shares (* (/ x (balance token-x-trait tx-sender)) (get shares-total pair))))
+                  (let ((new-shares (* (/ x (balance token-x-trait)) (get shares-total pair))))
                     (increase-shares token-x token-y tx-sender new-shares)
                     (+ new-shares (get shares-total pair))
                   )
@@ -214,8 +220,8 @@
             (map-set pairs-data-map ((token-x token-x) (token-y token-y))
               (
                 (shares-total shares-total)
-                ;; (balance-x (+ x (balance token-x-trait tx-sender)))
-                ;; (balance-y (+ y (balance token-y-trait tx-sender)))
+                ;; (balance-x (+ x (balance token-x-trait)))
+                ;; (balance-y (+ y (balance token-y-trait)))
                 (fee-balance-x (get fee-balance-x pair))
                 (fee-balance-y (get fee-balance-y pair))
                 (fee-to-address (get fee-to-address pair))
@@ -285,7 +291,7 @@
     (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
       (let ((shares (shares-of tx-sender)) (shares-total (get shares-total pair)) (contract-address (as-contract tx-sender)) (sender tx-sender))
         (let ((withdrawal (/ (* shares percent) u100)))
-          (let ((withdrawal-x (/ (* withdrawal (balance token-x-trait tx-sender)) shares-total)) (withdrawal-y (/ (* withdrawal (balance token-y-trait tx-sender)) shares-total)))
+          (let ((withdrawal-x (/ (* withdrawal (balance token-x-trait)) shares-total)) (withdrawal-y (/ (* withdrawal (balance token-y-trait)) shares-total)))
             (if
               (and
                 (<= percent u100)
@@ -297,8 +303,8 @@
                 (map-set pairs-data-map ((token-x token-x) (token-y token-y))
                   (
                     (shares-total (- shares-total withdrawal))
-                    ;; (balance-x (- (balance token-x-trait tx-sender) withdrawal-x))
-                    ;; (balance-y (- (balance token-y-trait tx-sender) withdrawal-y))
+                    ;; (balance-x (- (balance token-x-trait) withdrawal-x))
+                    ;; (balance-y (- (balance token-y-trait) withdrawal-y))
                     (fee-balance-x (get fee-balance-x pair))
                     (fee-balance-y (get fee-balance-y pair))
                     (fee-to-address (get fee-to-address pair))
@@ -330,12 +336,13 @@
         (
           (contract-address (as-contract tx-sender))
           (sender tx-sender)
-          (dy (/ (* u997 (balance token-y-trait tx-sender) dx) (+ (* u1000 (balance token-x-trait tx-sender)) (* u997 dx)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
+          (dy (/ (* u997 (balance token-y-trait) dx) (+ (* u1000 (balance token-x-trait)) (* u997 dx)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
           (fee (/ (* u5 dx) u10000)) ;; 5 bp
         )
+        (print "eeee")
         (print contract-address)
-        ;; (print (balance token-x-trait tx-sender))
-        ;; (print (balance token-y-trait tx-sender))
+        ;; (print (balance token-x-trait))
+        ;; (print (balance token-y-trait))
         (print dx)
         (print dy)
         (print fee)
@@ -350,11 +357,11 @@
                 (shares-total (get shares-total pair))
                 ;; (balance-x
                 ;;   (if (is-some (get fee-to-address pair))  ;; only collect fee when fee-to-address is set
-                ;;     (- (+ (balance token-x-trait tx-sender) dx) fee)  ;; add dx - fee
-                ;;     (+ (balance token-x-trait tx-sender) dx)  ;; add dx
+                ;;     (- (+ (balance token-x-trait) dx) fee)  ;; add dx - fee
+                ;;     (+ (balance token-x-trait) dx)  ;; add dx
                 ;;   )
                 ;; )
-                ;; (balance-y (- (balance token-y-trait tx-sender) dy))
+                ;; (balance-y (- (balance token-y-trait) dy))
                 (fee-balance-x
                   (if (is-some (get fee-to-address pair))  ;; only collect fee when fee-to-address is set
                     (+ fee (get fee-balance-x pair))
@@ -388,12 +395,13 @@
         (
           (contract-address (as-contract tx-sender))
           (sender tx-sender)
-          (dx (/ (* u1000 (balance token-x-trait tx-sender) dy) (* u997 (- (balance token-y-trait tx-sender) dy)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
-          (fee (/ (* (balance token-x-trait tx-sender) dy) (* u1994 (- (balance token-y-trait tx-sender) dy)))) ;; 5 bp
+          (dx (/ (* u1000 (balance token-x-trait) dy) (* u997 (- (balance token-y-trait) dy)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
+          (fee (/ (* (balance token-x-trait) dy) (* u1994 (- (balance token-y-trait) dy)))) ;; 5 bp
         )
+        (print "ffff")
         (print contract-address)
-        ;; (print (balance token-x-trait tx-sender))
-        ;; (print (balance token-y-trait tx-sender))
+        ;; (print (balance token-x-trait))
+        ;; (print (balance token-y-trait))
         (print dx)
         (print dy)
         (print fee)
@@ -408,11 +416,11 @@
                 (shares-total (get shares-total pair))
                 ;; (balance-x
                 ;;   (if (is-some (get fee-to-address pair))  ;; only collect fee when fee-to-address is set
-                ;;     (- (+ (balance token-x-trait tx-sender) dx) fee)  ;; add dx - fee
-                ;;     (+ (balance token-x-trait tx-sender) dx)  ;; add dx
+                ;;     (- (+ (balance token-x-trait) dx) fee)  ;; add dx - fee
+                ;;     (+ (balance token-x-trait) dx)  ;; add dx
                 ;;   )
                 ;; )
-                ;; (balance-y (- (balance token-y-trait tx-sender) dy))
+                ;; (balance-y (- (balance token-y-trait) dy))
                 (fee-balance-x
                   (if (is-some (get fee-to-address pair))  ;; only collect fee when fee-to-address is set
                     (+ fee (get fee-balance-x pair))
@@ -446,13 +454,16 @@
         (
           (contract-address (as-contract tx-sender))
           (sender tx-sender)
-          (dx (/ (* u997 (balance token-x-trait tx-sender) dy) (+ (* u1000 (balance token-y-trait tx-sender)) (* u997 dy)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
+          (dx (/ (* u997 (balance token-x-trait) dy) (+ (* u1000 (balance token-y-trait)) (* u997 dy)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
           (fee (/ (* u5 dy) u10000)) ;; 5 bp
         )
-        ;; (print (balance token-x-trait tx-sender))
-        ;; (print (balance token-y-trait tx-sender))
+        ;; (print (balance token-x-trait))
+        ;; (print (balance token-y-trait))
+        (print "gggg")
         (print dx)
         (print dy)
+        (print sender)
+        (print contract-address)
         (print fee)
         (if (and
           ;; TODO(psq): check that the amount transfered in matches the amount requested
@@ -463,11 +474,11 @@
             (map-set pairs-data-map ((token-x token-x) (token-y token-y))
               (
                 (shares-total (get shares-total pair))
-                ;; (balance-x (- (balance token-x-trait tx-sender) dx)) ;; remove dx
+                ;; (balance-x (- (balance token-x-trait) dx)) ;; remove dx
                 ;; (balance-y
                 ;;   (if (is-some (get fee-to-address pair))  ;; only collect fee when fee-to-address is set
-                ;;     (- (+ (balance token-y-trait tx-sender) dy) fee)  ;; add dy - fee
-                ;;     (+ (balance token-y-trait tx-sender) dy)  ;; add dy
+                ;;     (- (+ (balance token-y-trait) dy) fee)  ;; add dy - fee
+                ;;     (+ (balance token-y-trait) dy)  ;; add dy
                 ;;   )
                 ;; )
                 (fee-balance-x (get fee-balance-x pair))
@@ -503,12 +514,13 @@
         (
           (contract-address (as-contract tx-sender))
           (sender tx-sender)
-          (dy (/ (* u1000 (balance token-y-trait tx-sender) dx) (* u997 (- (balance token-x-trait tx-sender) dx)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
-          (fee (/ (* (balance token-y-trait tx-sender) dx) (* u1994 (- (balance token-x-trait tx-sender) dx)))) ;; 5 bp
+          (dy (/ (* u1000 (balance token-y-trait) dx) (* u997 (- (balance token-x-trait) dx)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
+          (fee (/ (* (balance token-y-trait) dx) (* u1994 (- (balance token-x-trait) dx)))) ;; 5 bp
         )
+        (print "hhhh")
         (print contract-address)
-        ;; (print (balance token-x-trait tx-sender))
-        ;; (print (balance token-y-trait tx-sender))
+        ;; (print (balance token-x-trait))
+        ;; (print (balance token-y-trait))
         (print dx)
         (print dy)
         (print fee)
@@ -521,11 +533,11 @@
             (map-set pairs-data-map ((token-x token-x) (token-y token-y))
               (
                 (shares-total (get shares-total pair))
-                ;; (balance-x (- (balance token-x-trait tx-sender) dx)) ;; remove dx
+                ;; (balance-x (- (balance token-x-trait) dx)) ;; remove dx
                 ;; (balance-y
                 ;;   (if (is-some (get fee-to-address pair))  ;; only collect fee when fee-to-address is set
-                ;;     (- (+ (balance token-y-trait tx-sender) dy) fee)  ;; add dy - fee
-                ;;     (+ (balance token-y-trait tx-sender) dy)  ;; add dy
+                ;;     (- (+ (balance token-y-trait) dy) fee)  ;; add dy - fee
+                ;;     (+ (balance token-y-trait) dy)  ;; add dy
                 ;;   )
                 ;; )
                 (fee-balance-x (get fee-balance-x pair))
@@ -557,8 +569,8 @@
         (map-set pairs-data-map ((token-x token-x) (token-y token-y))
           (
             (shares-total (get shares-total pair))
-            ;; (balance-x (balance token-x-trait tx-sender))
-            ;; (balance-y (balance token-y-trait tx-sender))
+            ;; (balance-x (balance token-x-trait))
+            ;; (balance-y (balance token-y-trait))
             (fee-balance-x (get fee-balance-y pair))
             (fee-balance-y (get fee-balance-y pair))
             (fee-to-address (some address))
@@ -574,7 +586,7 @@
 )
 
 ;; ;; clear the contract fee addres
-;; ;; TODO(psq): if there are any collected fees, prevent this from happening, as the fees can no longer be colllect with `collect-fees`
+;; ;; TODO(psq): if there are any collected fees, prevent this from happening, as the fees can no longer be collect with `collect-fees`
 (define-public (reset-fee-to-address (token-x principal) (token-y principal))
   (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
     (if (is-eq tx-sender contract-owner)
@@ -582,8 +594,8 @@
         (map-set pairs-data-map ((token-x token-x) (token-y token-y))
           (
             (shares-total (get shares-total pair))
-            ;; (balance-x (balance token-x-trait tx-sender))
-            ;; (balance-y (balance token-y-trait tx-sender))
+            ;; (balance-x (balance token-x-trait))
+            ;; (balance-y (balance token-y-trait))
             (fee-balance-x (get fee-balance-y pair))
             (fee-balance-y (get fee-balance-y pair))
             (fee-to-address none)
@@ -617,6 +629,7 @@
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
     (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
       (let ((address (unwrap! (get fee-to-address pair) no-fee-to-address-err)) (fee-x (get fee-balance-x pair)) (fee-y (get fee-balance-y pair)))
+        (print "iiii")
         (print fee-x)
         (print fee-y)
         (print (as-contract tx-sender))
@@ -630,8 +643,8 @@
             (map-set pairs-data-map ((token-x token-x) (token-y token-y))
               (
                 (shares-total (get shares-total pair))
-                ;; (balance-x (balance token-x-trait tx-sender))
-                ;; (balance-y (balance token-y-trait tx-sender))
+                ;; (balance-x (balance token-x-trait))
+                ;; (balance-y (balance token-y-trait))
                 (fee-balance-x u0)
                 (fee-balance-y u0)
                 (fee-to-address (get fee-to-address pair))

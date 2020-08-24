@@ -21,9 +21,9 @@ export class OracleClient extends Client {
     )
   }
 
-  async transfer(recipient: string, amount: number, params: { sender: string }): Promise<boolean> {
+  async updatePrice(price: number, params: { sender: string }): Promise<boolean> {
     const tx = this.createTransaction({
-      method: { name: "transfer", args: [`'${recipient}`, `u${amount}`] }
+      method: { name: "transfer", args: [`'${price}`] }
     })
     await tx.sign(params.sender)
     const receipt = await this.submitTransaction(tx)
@@ -35,16 +35,16 @@ export class OracleClient extends Client {
     throw TransferError
   }
 
-  async balanceOf(owner: string): Promise<number> {
-    const query = this.createQuery({
-      method: {
-        name: 'balance-of',
-        args: [`'${owner}`],
-      },
-    })
-    const receipt = await this.submitQuery(query)
-    return Result.unwrapUInt(receipt)
-  }
+  // async balanceOf(owner: string): Promise<number> {
+  //   const query = this.createQuery({
+  //     method: {
+  //       name: 'balance-of',
+  //       args: [`'${owner}`],
+  //     },
+  //   })
+  //   const receipt = await this.submitQuery(query)
+  //   return Result.unwrapUInt(receipt)
+  // }
 
 
 }
