@@ -23,8 +23,7 @@ Abstract
 ### Why non correlation is important
 TBD
 
-|   |           | total     |      | alice            | alice          | bob              | bob            |              | supply ∆    |     
-|   | market cap| supply    |price | adjusted balance | adjusted share | adjusted balance | adjusted share | supply ∆     | / smoothing |
+|   | market cap| total supply    |price | alice adjusted balance | alice adjusted share | bob adjusted balance | bob adjusted share | supply ∆     | supply ∆ / smoothing |
 |---|-----------|-----------|------|------------------|----------------|------------------|----------------|--------------|-------------|
 |t1 | 1,300,000 | 1,000,000 |1.30  | 100,000      | 10.000%        |                  |                |   300000 | 10000   |
 |t2 | 1,111,000 | 1,010,000 |1.10  | 101,000      | 10.000%        |                  |                |   101000 | 3366    |
