@@ -30,7 +30,9 @@ TBD: add table with price and balance variations
 
 # The flexr ecosystem
 
-The [flexr token](#the-flexr-token) implements the [SRC20 trait](#the-src20-token-trait) relies on a new version of [swapr](#changes-to-swapr) for trading.  Liquidity providers on [swapr](#changes-to-swapr) can in turn stake their liquidity using a new swapr pair token on the [flexr geyser](#the-flexr-geyser).  The longer you stake your liquidity token, the higher the reward you may get (in [flexr](#the-flexr-token) token), up to 3x after 2 months.  The [flexr token](#the-flexr-token#) relies on an [Oracle](#the-flexr-oracle) to learn about the price average over the past 24 hours to know whether, or how much to [rebase](#flexr-rebase-math).
+The [flexr token](#the-flexr-token) implements the [SRC20 trait](#the-src20-token-trait) relies on a new version of [swapr](#changes-to-swapr) for trading.  Liquidity providers on [swapr](#changes-to-swapr) can in turn stake their liquidity using a new swapr pair token on the [flexr geyser](#the-flexr-geyser).  The longer you stake your liquidity token, the higher the reward you may get (in [flexr](#the-flexr-token) token), up to 3x after 2 months.  The [flexr token](#the-flexr-token) relies on an [Oracle](#the-flexr-oracle) to learn about the price average over the past 24 hours to know whether, or how much to [rebase](#flexr-rebase-math).
+
+By incentivizing liquidity providers, the Ampleforth token was able to become the pair (AMPL-ETH) with the most liquidity on Uniswap in just a few months.  Having a similar incentive should help the flexr token in a similar way.
 
 
 ## the SRC20 token trait
@@ -54,7 +56,7 @@ During a rebase, everyone's balances get adjusted.  As this would not scale very
 ## The flexr Oracle
 see https://docs.pro.coinbase.com/#oracle for details on how to do it, but still missing secp256k1 signature verification (https://github.com/blockstack/stacks-blockchain/issues/1134)
 
-## The flexr geyser
+## The flexr Geyser
 Liquidity providers on swapr get a token representing their share of the liquity they provide on the flexr-wrapr pair (STX needs to be wrapped )
 
 ## Putting it all together
