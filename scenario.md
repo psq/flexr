@@ -7,14 +7,14 @@
 - fund user[1-3] with [stx](./balances.json) 
 - user[1-3] wrap stx using `wrapr`
 - user[1-3] buy flexr tokens
-- user1 provide liquidity to the flexr-stx pair
+- user1 provide liquidity to the flexr-stx pair and gets back liquidity token
 - user1 stakes his flexr-stx pair in the geyser
 
 - go through a few price updates and rebase (how to advance block faster with clarity-js-sdk?)
-x user3 tries rebase arbitrage
+- user3 tries rebase arbitrage (TBD)
 
 - user1 withdraws reward from geyser and checks earnings
-x user1 withdraw liquity and checks earnings 
+- user1 withdraw liquity and checks earnings (TBD)
 
 # Scenario run output
 ```
@@ -65,3 +65,4 @@ initialize balances.json /var/folders/10/vfzc9gqn6cs8d2zldp6v83400000gp/T/blocks
 ✨  Done in 24.57s.
 ```
 
+Alice got 960_000 micro flexr after just a few blocks 😂
