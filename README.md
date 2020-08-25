@@ -111,7 +111,7 @@ reward-factor is 3 for anything longer than 2000 blocks (> 2 weeks)
 The reward gets credited when the user unstakes their liquidity provider tokens (i.e. they gets their liquity token back, and their flexr reward).
 
 ## Putting it all together
-(see more details in the [Scenario descrition](./scenario.md)) or the [tests](./test/unit/flexr.ts).  As Clarity JS SDK still does not support setting STX balances, this requires a special version of the client.  Fortunately, `clarity-bin` supports providing a [json](./balances.json) file.
+(see more details in the [Scenario description](./scenario.md)) or the [tests](./test/unit/flexr.ts).  As Clarity JS SDK still does not support setting STX balances, this requires a special version of the client.  Fortunately, `clarity-bin` supports providing a [json](./balances.json) file.
 
 
 # Gotchas
