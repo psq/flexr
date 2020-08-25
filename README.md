@@ -1,5 +1,5 @@
 # flexr
-A reimplementation of the [Ampleforth](https://www.ampleforth.org/) token and its [geyser](https://www.ampleforth.org/dapps/).
+A reimplementation of the [Ampleforth](https://www.ampleforth.org/) token, Oracle and [Geyser](https://www.ampleforth.org/dapps/).
 
 This also demonstrates how multiple Clarity contracts can interact with each other to provide value to users.  The sum is greater than the parts!
 
