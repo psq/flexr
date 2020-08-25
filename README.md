@@ -44,9 +44,9 @@ Supply, price and balances over time:
 
 Bob gets 100,000 flexr at t=1 with an adjustment factor of 1,000,000 (the supply at t=1), and Alice gets 50,000 flexr with an ajdustment factor of 1,013,366.667 (the supply at t=3 when she gets her tokens).  See below for more on the [adjustement factor](#flexr-rebase-math).
 
-Note #2: Alice and Bob share remains constant despite the balance and price adjustments.  This is the invariant maintained by the rebase.
+Note #1: Alice and Bob share remains constant despite the balance and price adjustments.  This is the invariant maintained by the rebase.
 
-Note #1: there is no price change at t=4, so no rebase needed.
+Note #2: there is no price change at t=4, so no rebase needed.
 
 # The flexr ecosystem
 
