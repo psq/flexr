@@ -6,12 +6,8 @@
 
 (define-public (transfer (recipient principal) (amount uint))
   (begin
-    (print "oooo")
-    (print tx-sender)
-    (print recipient)
-    (print amount)
-    (print (ft-get-balance token tx-sender))
-    (print (ft-transfer? token amount tx-sender recipient))
+    (ft-get-balance token tx-sender)
+    (ft-transfer? token amount tx-sender recipient)
   )
 )
 
