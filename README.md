@@ -1,5 +1,5 @@
 # flexr
-A reimplementation of the Ampleforth token and its geyser.
+A reimplementation of the [Ampleforth](https://www.ampleforth.org/) token and its [geyser](https://www.ampleforth.org/dapps/).
 
 This also demonstrates how multiple Clarity contracts can interact with each other to provide value to users.  The sum is greater than the parts!
 
@@ -8,11 +8,11 @@ This also demonstrates how multiple Clarity contracts can interact with each oth
 
 ## Introduction
 
-Like Ampleforth (AMPL), flexr adjusts its supply based on current demand.  If the price is lower than the target price, the supply contracts, and in the same fashion, if the price has increased too much, the supply will expand.  For long time holders, the daily planned rebase does not affect the amount they own, i.e. holding 2 token worth $1 or holding 1 token worth $2, or 4 tokens worth $0.5 does not change how much your tokens are worth.  It does provide an opportunity for short term traders to arbitrage the price around the rebase time.
+Like Ampleforth (AMPL), flexr adjusts its supply based on current demand.  If the price is lower than the target price, the supply contracts, and in the same fashion, if the price has increased too much, the supply will expand.  For long time holders, the daily planned rebase does not affect the amount they own, i.e. holding 2 token worth $1 or holding 1 token worth $2, or 4 tokens worth $0.5 does not change how much your tokens are worth.  It does provide an opportunity for short term traders to arbitrage the price around the rebase time, and do so at a [profit](https://gauntlet.network/reports/ampleforth).
 
-To minimize price movement, the rebase is done with a planned 30 days to reach the target price, but with no memory of what was done before, so each rebase adjusts the supply by 1/30 of what is needed.
+To minimize price movement, the rebase is done with a planned 30 days to reach the target price, with no memory of what was done before, so each rebase adjusts the supply by 1/30 of what is needed based on all available data at the time the rebase occurs.
 
-By using an elastic supply, it minimizes the possibility of demand/supply shocks, and creates an asset with near zero correlation to other assets.  In other words, this reduces [systematic risk](https://www.ampleforth.org/economics/)
+Using an elastic supply minimizes the possibility of demand/supply shocks, and creates an asset with near zero correlation to other assets.  In other words, this reduces [systematic risk](https://www.ampleforth.org/economics/)
 
 ### Economic background on flexible synthetic commodities
 See the [paper](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2000118) on Synthetic Commodity Money by George Selgin.
@@ -50,12 +50,12 @@ Note #1: there is no price change at t=4, so no rebase needed.
 
 # The flexr ecosystem
 
-The [flexr token](#the-flexr-token) implements the [SRC20 trait](#the-src20-token-trait) relies on a new version of [swapr](#changes-to-swapr) for trading.  Liquidity providers on [swapr](#changes-to-swapr) can in turn stake their liquidity using a new swapr pair token on the [flexr geyser](#the-flexr-geyser).  The longer you stake your liquidity token, the higher the reward you may get (in [flexr](#the-flexr-token) token), up to 3x after 2 months.  The [flexr token](#the-flexr-token) relies on an [Oracle](#the-flexr-oracle) to learn about the price average over the past 24 hours to know whether, or how much to [rebase](#flexr-rebase-math).
+The [flexr token](#the-flexr-token) implements the [SRC20 trait](#the-src20-token-trait) relies on a new version of [swapr](#changes-to-swapr) for trading.  Liquidity providers on [swapr](#changes-to-swapr) can in turn stake their liquidity using a new swapr pair token on the [flexr geyser](#the-flexr-geyser).  The longer you stake your liquidity token, the higher the reward you may get (in [flexr](#the-flexr-token) token), up to 3x after 2 weeks (subject to change, as it will likely be longer).  The [flexr token](#the-flexr-token) relies on an [Oracle](#the-flexr-oracle) to learn about the price average over the past 24 hours to know whether, and how much to [rebase](#flexr-rebase-math).
 
 By incentivizing liquidity providers, the Ampleforth token was able to become the pair (AMPL-ETH) with the most liquidity on Uniswap in just a few months.  Having a similar incentive should help the flexr token in a similar way.
 
 
-## the SRC20 token trait
+## The SRC20 token trait
 swapr now relies on tokens that implements the [SRC20 trait](./contracts/src20-trait.clar) to allow for:
 - transfer
 ```closure
@@ -80,13 +80,18 @@ SRC20, or Stacks Request for Comments #20 (to keep things simple, as most people
 The original version of [swapr](https://github.com/psq/swapr) was relased for the first Blockstak Hackaton.
 
 In order to support flexr, it was necessary to introduce the following changes:
-- balances are no longer hardcoded, allowing for tokens with an elastic supply.  It looks like Uniswap v2 can also support this as it support AMPL.
-- the main swaprs contract can be used for multiple pairs by leveraging traits, although it is very likely that the final version will need one contract deployed per pair anyway, but this can be the exact same contract, not a contract with hardcoded pair addresses, so a net benefit
-- liquidity providers now get a token for their share of liquidity they provide to a pair, allowing them to exchange it with others, or stake it (used by flexr's geyser!).  Uniswap v2 supports this as well.  That token itself is also an [SRC20 token](#the-src20-token-trait) with an additional function `mint` only callable by the `swapr` contract when a user adds to their liquidity position).
+- balances are no longer hardcoded, allowing for tokens with an elastic supply.  It looks like Uniswap v2 can also support this as it supports AMPL.
+- the main swapr contract can be used for multiple pairs by leveraging [Clarity Traits](https://docs.blockstack.org/references/clarity-language#dynamic-dispatch), although it is very likely that the final version will need one contract deployed per pair anyway, but this can be the exact same contract, not a contract with hardcoded pair addresses, so a net benefit.
+- liquidity providers now receive a [token](./contracts/swapr-token-flexr-wrapr.clar) for their share of liquidity they provide to a pair, allowing them to exchange it with others, or stake it (used by flexr's [geyser](#the-flexr-geyser)!).  Uniswap v2 supports this as well.  That token itself is also an [SRC20 token](#the-src20-token-trait) with an additional function `mint` only callable by the `swapr` contract when a user adds to their liquidity position).
 
 Note: technically, the new version of swapr is not part of this Hackaton submission, but shows how various contracts can leverage contracts for a rich ecosystem.  The changes, though, are fairly significant.
 
 ## The flexr token
+
+The flexr token implements the functions in the [SRC20 trait](#the-src20-token-trait) with the addition of a `rebase` function:
+```
+(define-public (rebase) ...)
+```
 
 ### flexr rebase math
 During a rebase, everyone's balances get adjusted.  As this would not scale very well with a high number of holders, rebase calculate an adjustment factor to apply to apply to each balance, which gets finalized when exchanging the flexr token.
