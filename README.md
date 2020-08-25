@@ -108,6 +108,7 @@ As Clarity does not yet support secp256k1 signature verification (see https://gi
 
 Ultimately, once the support for signature verification is added, the need for an Oracle contract will be removed, and a model like the [Coinbase Oracle](https://docs.pro.coinbase.com/#oracle) can be used by passing a signed price data payload to the [rebase](#flexr-rebase-math) function.  The signed payload contains the price and the timestamp, making it secure.  Again, removing the need for a trusted third party to update the oracle.  Decentralization FTW!  Multiple such oracles could be added.
 
+To avoid rebasing too often and introduce unnecessary noise, a rebase will be triggered only if the price has deviated more than 5% lower or higher than the target price (not fully implemented at the moment).
 
 ## The flexr Geyser
 Liquidity providers on swapr get a token representing their share of the liquity they provide on the flexr-wrapr pair (STX needs to be wrapped to provide an SRC20 equivalent token).  Not only do liquitity providers benefit by earning a fee on all swaps, they also benefit by staking their liquity token in exchange for higher and higher rewards the longer they stake their tokens.
