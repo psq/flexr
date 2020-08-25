@@ -3,6 +3,11 @@ A reimplementation of the Ampleforth token and its geyser.
 
 This also demonstrates how multiple Clarity contracts can interact with each other to provide value to users.  The sum is greater than the parts!
 
+## TL;DR
+[flexr](#the-flexr-token) is an [SRC20 token](#the-src20-token-trait) with an elastic supply, guaranteed by design to be [uncorrelated](#why-non-correlation-is-important) to other tokens.  The supply of flexr token gets adjusted ([rebased](#flexr-rebase-math)) on a daily basis based on the price provided by an [Oracle](#the-flexr-oracle).  The flexr token can be exchanged with STX on [swapr](#changes-to-swapr).  Liquidity providers on swapr are further incentivized by staking the proof they provide liquity on a [Geyser](#changes-to-swapr) that provides higher and higher rewards the longer liquidity providers keep staking.
+
+## Introduction
+
 Like Ampleforth (AMPL), flexr adjusts its supply based on current demand.  If the price is lower than the target price, the supply contracts, and in the same fashion, if the price has increased too much, the supply will expand.  For long time holders, the daily planned rebase does not affect the amount they own, i.e. holding 2 token worth $1 or holding 1 token worth $2, or 4 tokens worth $0.5 does not change how much your tokens are worth.  It does provide an opportunity for short term traders to arbitrage the price around the rebase time.
 
 To minimize price movement, the rebase is done with a planned 30 days to reach the target price, but with no memory of what was done before, so each rebase adjusts the supply by 1/30 of what is needed.
@@ -98,7 +103,7 @@ Ultimately, once signature verification, the need for an Oracle contract will be
 
 
 ## The flexr Geyser
-Liquidity providers on swapr get a token representing their share of the liquity they provide on the flexr-wrapr pair (STX needs to be wrapped).
+Liquidity providers on swapr get a token representing their share of the liquity they provide on the flexr-wrapr pair (STX needs to be wrapped).  Not only do liquitity providers benefit by earning a fee on all swaps, they also benefit by staking their liquity token in exchange for higher and higher rewards the longer they stake their tokens.
 
 The base reward is calculated as follow:
 ```
