@@ -56,7 +56,7 @@ By incentivizing liquidity providers, the Ampleforth token was able to become th
 
 
 ## the SRC20 token trait
-swapr relied on tokens that implements the [SRC20 trait](./contracts/src20-trait.clar) to allow for:
+swapr now relies on tokens that implements the [SRC20 trait](./contracts/src20-trait.clar) to allow for:
 - transfer
 ```closure
 (define-public (transfer (recipient principal) (amount uint)) ...)
@@ -73,6 +73,8 @@ swapr relied on tokens that implements the [SRC20 trait](./contracts/src20-trait
 ```closure
 (define-public (total-supply) ...)
 ```
+
+SRC20, or Stacks Request for Comments #20 (to keep things simple, as most people understand what [ERC20](https://eips.ethereum.org/EIPS/eip-20) is), although it would be desirable to creat a new SIP so tokens are interoperable on the Stacks chain.  SRC20 does not requires the same set of methods ERC20 does.
 
 ## Changes to swapr
 The original version of [swapr](https://github.com/psq/swapr) was relased for the first Blockstak Hackaton.
