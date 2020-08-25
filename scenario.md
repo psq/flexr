@@ -1,18 +1,12 @@
-# Intro
-Intro on Ampleforth and its geyser, and how it uses Uniswap
-the benefit of non correlation
-synthetic commodity (with elasticity)
-Intro on changes to swapr
-
 # Test scenario
-- init contracts
-- init flexr treasury with flexr and enough stx for funding swapr
-- setup flexr-stx pair in swapr and fund from flexr treasury
-- fund geyser from flexr treasury
+- initialize all [contracts](./contracts).  There are 2 traits, and 6 contracts interacting with each order.  The order in which you deploy them is important!
+- init flexr treasury with [flexr](./contracts/flexr-token.clar) tokens (see line before last) and enough [stx](./balances.json) for funding swapr 
+- setup flexr-wrapr pair in swapr and fund from flexr treasury (as STX is not a token, `wrapr` is used to wrap STX into an [SRC20 token](./contracts/src20-trait.clar) that can be used with `swapr`)
+- fund Geyser from flexr treasury (done when deploying the [flexr](./contracts/flexr-token.clar) contract, see last line)
 
-- fund user[1-3] with stx
-- user[1-3] wrap stx
-- user[1-3] buy flexr
+- fund user[1-3] with [stx](./balances.json) 
+- user[1-3] wrap stx using `wrapr`
+- user[1-3] buy flexr tokens
 - user1 provide liquidity to the flexr-stx pair
 - user1 stakes his flexr-stx pair in the geyser
 

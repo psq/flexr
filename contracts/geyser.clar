@@ -69,7 +69,7 @@
   )
 )
 
-;; reward is amount * reward-factor * #blocks / reward-period per 1000 swapr token in FLEXR tokens
+;; reward is amount * reward-factor * #blocks / reward-period per 1000 swapr-flexr-wrapr token in flexr tokens
 
 (define-private (send-back (recipient principal) (amount uint) (blocks uint) (reward-factor uint))
   (let ((reward-amount (/ (* amount (* blocks reward-factor)) (* u1000 reward-period))))

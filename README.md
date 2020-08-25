@@ -1,7 +1,7 @@
 # flexr
 A reimplementation of the Ampleforth token and its geyser.
 
-This also demonstrates how multiple contracts can interact with each other to provide value to users.
+This also demonstrates how multiple Clarity contracts can interact with each other to provide value to users.  The sum is greater than the parts!
 
 Like Ampleforth (AMPL), flexr adjusts its supply based on current demand.  If the price is lower than the target price, the supply contracts, and in the same fashion, if the price has increased too much, the supply will expand.  For long time holders, the daily planned rebase does not affect the amount they own, i.e. holding 2 token worth $1 or holding 1 token worth $2, or 4 tokens worth $0.5 does not change how much your tokens are worth.  It does provide an opportunity for short term traders to arbitrage the price around the rebase time.
 
@@ -53,9 +53,21 @@ By incentivizing liquidity providers, the Ampleforth token was able to become th
 ## the SRC20 token trait
 swapr relied on tokens that implements the [SRC20 trait](./contracts/src20-trait.clar) to allow for:
 - transfer
+```closure
+(define-public (transfer (recipient principal) (amount uint)) ...)
+```
 - name of the token
+```closure
+(define-public (name) ...)
+```
 - getting the balance of an owner
+```closure
+(define-public (balance-of (recipient principal)) ...)
+```
 - getting the total supply
+```closure
+(define-public (total-supply) ...)
+```
 
 ## Changes to swapr
 The original version of [swapr](https://github.com/psq/swapr) was relased for the first Blockstak Hackaton.
@@ -63,7 +75,7 @@ The original version of [swapr](https://github.com/psq/swapr) was relased for th
 In order to support flexr, it was necessary to introduce the following changes:
 - balances are no longer hardcoded, allowing for tokens with an elastic supply.  It looks like Uniswap v2 can also support this as it support AMPL.
 - the main swaprs contract can be used for multiple pairs by leveraging traits, although it is very likely that the final version will need one contract deployed per pair anyway, but this can be the exact same contract, not a contract with hardcoded pair addresses, so a net benefit
-- liquidity providers now get a token for their share of liquidity they provide to a pair, allowing them to exchange it with others, or stake it (used by flexr's geyser!).  Uniswap v2 supports this as well.
+- liquidity providers now get a token for their share of liquidity they provide to a pair, allowing them to exchange it with others, or stake it (used by flexr's geyser!).  Uniswap v2 supports this as well.  That token itself is also an [SRC20 token](#the-src20-token-trait) with an additional function `mint` only callable by the `swapr` contract when a user adds to their liquidity position).
 
 Note: technically, the new version of swapr is not part of this Hackaton submission, but shows how various contracts can leverage contracts for a rich ecosystem.  The changes, though, are fairly significant.
 
@@ -86,10 +98,20 @@ Ultimately, once signature verification, the need for an Oracle contract will be
 
 
 ## The flexr Geyser
-Liquidity providers on swapr get a token representing their share of the liquity they provide on the flexr-wrapr pair (STX needs to be wrapped)
+Liquidity providers on swapr get a token representing their share of the liquity they provide on the flexr-wrapr pair (STX needs to be wrapped).
+
+The base reward is calculated as follow:
+```
+reward = amount * reward-factor * #blocks / reward-period per 1000 swapr-flexr-wrapr token in flexr tokens
+reward-factor is 1 for first 1000 blocks (about 1 week)
+reward-factor is 2 for next 1000 blocks (about 2 weeks)
+reward-factor is 3 for anything longer than 2000 blocks (> 2 weeks)
+```
+
+The reward gets credited when the user unstakes their liquidity provider tokens (i.e. they gets their liquity token back, and their flexr reward).
 
 ## Putting it all together
-(see more details in the [Scenario descrition](./scenario.md)) or the [tests](./test/unit/flexr.ts)
+(see more details in the [Scenario descrition](./scenario.md)) or the [tests](./test/unit/flexr.ts).  As Clarity JS SDK still does not support setting STX balances, this requires a special version of the client.  Fortunately, `clarity-bin` supports providing a [json](./balances.json) file.
 
 
 # Gotchas
