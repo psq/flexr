@@ -99,7 +99,16 @@ During a rebase, everyone's balances get adjusted.  As this would not scale very
 ```
 supply∆ = (current_price - price_target) * current_total_supply / price_target
 smoothed_supply∆ = supply∆ / 30
-``` 
+```
+
+Each user balance can be calculated by using the current supply, and the supply at the time they got their token, and updating these values each they add or remove tokens as follow:
+```
+user_balance = current_supply * initial_balance / initial_supply
+
+initial_balance: token balance when position was added
+initial_supply: total supply when position was added
+```
+
 
 Anyone can trigger a rebase, as long as it is past the previous rebase window (about 24 hours), so there is no reliance on an admin to do so.  You just pay the minimal transaction fee.
 
