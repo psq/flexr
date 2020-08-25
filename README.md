@@ -129,12 +129,20 @@ For more details, see a testing scenario [Scenario description](./scenario.md) o
 
 
 # Gotchas
-To run the tests requires a patched version of the clarity-native-bin module to support setting STX balances from [balances.json](./balances.json).
+### Gotcha #1
+To run the tests requires an up to date version of the clarity-native-bin module to support setting STX balances from [balances.json](./balances.json) and a patched version of the clarity js sdk.
+
 See https://github.com/blockstack/clarity-js-sdk/issues/77 for more details.  The real fix will need a bit more work than what was used to provide a more developer friendly experience.  Happy to provide this patch to anyone, it is only a couple lines.
 
-The flexr token can not use the native `ft-token` provided by Clarity, as the `ft-token` does not support dynamically changing the balance as required by the flexr monetary policy.  This means, however that you lose the safety provided by the post conditions on token transfers.  In fact, it would require new types of post conditions (check variable value, check map values, ...), which could be also helpful in other cases.
+### Gotcha #2
+The flexr token can not use the native `ft-token` provided by Clarity, as the `ft-token` does not support dynamically changing the balance as required by the flexr monetary policy.  
 
-The flexr token relies on `block-height` for defining the rebase window (144 blocks to be exact, which represents about 24 hours with a 10 minutes block average).  However, as the Clarity JS SDK does not allow for advancing to any block, that value has been artificially reduced (to 3).  Having a function to advance to a given block would be highly beneficial to test these kind of use cases that are supposed to be long running (weeks to months, so 1000s of blocks)
+This means, however that you lose the safety provided by the post conditions on token transfers.  In fact, it would require new types of post conditions (check variable value, check map values, ...), which could be also helpful in other cases.
+
+### Gotcha #3
+The flexr token relies on `block-height` for defining the rebase window (144 blocks to be exact, which represents about 24 hours with a 10 minutes block average).  
+
+However, as the Clarity JS SDK does not allow for advancing to any block, that value has been artificially reduced (to 3).  Having a function to advance to a given block would be highly beneficial to test these kind of use cases that are supposed to be long running (weeks to months, so 1000s of blocks)
 
 
 
