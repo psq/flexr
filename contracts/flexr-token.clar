@@ -59,6 +59,7 @@
   (ok "flexr")
 )
 
+;; can be run by anyone as long as the block height is farther enough from the previous rebase
 (define-public (rebase)
   (begin
     (if (> block-height (+ (var-get last-rebase-height) rebalance-period))
@@ -72,6 +73,7 @@
   )
 )
 
+;; internal calculation of the smoothed supply adjustment
 (define-private (run-rebase)
   (let ((current-price-data (contract-call? .oracle get-price)))
     (let ((current-price (get price current-price-data)))
@@ -84,8 +86,8 @@
   )
 )
 
-;; flexr treasury
+;; fund the flexr treasury
 (map-set balances {owner: 'SP1EHFWKXQEQD7TW9WWRGSGJFJ52XNGN6MTJ7X462} {base-amount: u950000000000000, total-supply-adjuster: u1000000000000000})
-;; flexr geyser
+;; fund flexr geyser
 (map-set balances {owner: 'S1G2081040G2081040G2081040G208105NK8PE5.geyser} {base-amount: u50000000000000, total-supply-adjuster: u1000000000000000})
 

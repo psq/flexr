@@ -13,6 +13,7 @@
 ;; using stubbed calls till secp256k1 verification is implemented
 ;; will consider rewarding sender with some flexr tokens
 ;; data needs to be sent 10-15 blocks before next rebalance, picks a winner at random
+;; or rather, the signed payload can be passed to flexr.rebase, removing the need for a separate oracle contract, and 1 less transaction per day
 (define-public (update-price (price uint))
   (if (is-eq tx-sender oracle-owner)
     (begin

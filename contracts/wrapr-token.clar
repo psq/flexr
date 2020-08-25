@@ -1,3 +1,5 @@
+;; this is the original wrapr contract, with the additional functions now required by SRC20
+
 (impl-trait .src20-trait.src20-trait)
 
 (define-data-var supply uint u0)

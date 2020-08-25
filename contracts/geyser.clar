@@ -20,7 +20,7 @@
 (define-data-var supply uint u0)
 
 ;; stake token
-;; pass in a swapr token for the FLEXR-STX pair token and amount
+;; pass in a swapr token for the FLEXR-WRAPR pair token and amount
 (define-public (stake (amount uint))
   (if (is-ok (contract-call? .swapr-token transfer (as-contract tx-sender) amount))
     (let ((prior-amount (default-to u0 (get amount (map-get? balances {owner: tx-sender})))))
@@ -34,7 +34,7 @@
 
 
 ;; unstake token
-;; collect back the FLEXR-STX pair token and FLEXR reward
+;; collect back the FLEXR-WRAPR pair token and FLEXR reward
 ;; reward is based on number of block token was staked (1000 blocks => x1, 2000 blocks => 2x, 3000 blocks => 3x)
 (define-public (unstake)
   (let ((balance (map-get? balances {owner: tx-sender})))
@@ -54,12 +54,10 @@
       )
       (err no-stake-err)
     )
-    ;; (err geyser-empty-err)
   )
 )
 
 ;; reward is amount * reward-factor * #blocks / reward-period per 1000 swapr-flexr-wrapr token in flexr tokens
-
 (define-private (send-back (recipient principal) (amount uint) (blocks uint) (reward-factor uint))
   (let ((reward-amount (/ (* amount (* blocks reward-factor)) (* u1000 reward-period))))
     (if (is-ok (as-contract (contract-call? .swapr-token transfer recipient amount)))
@@ -72,6 +70,7 @@
   )
 )
 
+;; find out total amount of staked FLEXR-WRAPR pair tokens
 (define-read-only (total-supply)
   (ok (var-get supply))
 )

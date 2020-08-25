@@ -1,4 +1,6 @@
-;; Time for Stacks Request for Comment, the 20th edition...
+;; this is an SRC20 method with an additional mint function
+;; as Clarity does not support "includes", copy the needed funcitons, and add new ones
+
 (define-trait swapr-trait
   (
     (transfer (principal uint) (response bool uint))
