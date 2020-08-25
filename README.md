@@ -104,9 +104,9 @@ smoothed_supply∆ = supply∆ / 30
 Anyone can trigger a rebase, as long as it is past the previous rebase window (about 24 hours), so there is no reliance on an admin to do so.  You just pay the minimal transaction fee.
 
 ## The flexr Oracle
-As Clarity does not support secp256k1 signature verification (see https://github.com/blockstack/stacks-blockchain/issues/1134, coming up shortly), it is using a dump oracle where a trusted party can supply the volume weighted average price for the previous period.  That price has to be provided within a small time period before the rebase can be triggered.
+As Clarity does not yet support secp256k1 signature verification (see https://github.com/blockstack/stacks-blockchain/issues/1134, coming up shortly!), it is using a dumb oracle where a trusted party can supply the volume weighted average price for the previous period.  That price has to be provided within a small time period before the rebase can be triggered.
 
-Ultimately, once signature verification, the need for an Oracle contract will be removed, and a model like the [Coinbase Oracle](https://docs.pro.coinbase.com/#oracle) can be used by passing a signed price data payload to the [rebase](#flexr-rebase-math) function.  Again, removing the need for a trusted third party.  Decentralization FTW!
+Ultimately, once the support for signature verification is added, the need for an Oracle contract will be removed, and a model like the [Coinbase Oracle](https://docs.pro.coinbase.com/#oracle) can be used by passing a signed price data payload to the [rebase](#flexr-rebase-math) function.  The signed payload contains the price and the timestamp, making it secure.  Again, removing the need for a trusted third party to update the oracle.  Decentralization FTW!  Multiple such oracles could be added.
 
 
 ## The flexr Geyser
