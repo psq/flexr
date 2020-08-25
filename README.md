@@ -1,5 +1,7 @@
 # flexr
-A reimplementation of the Ampleforth token and its geyser
+A reimplementation of the Ampleforth token and its geyser.
+
+This also demonstrates how multiple contracts can interact with each other to provide value to users.
 
 Like Ampleforth (AMPL), flexr adjusts its supply based on current demand.  If the price is lower than the target price, the supply contracts, and in the same fashion, if the price has increased too much, the supply will expand.  For long time holders, the daily planned rebase does not affect the amount they own, i.e. holding 2 token worth $1 or holding 1 token worth $2, or 4 tokens worth $0.5 does not change how much your tokens are worth.  It does provide an opportunity for short term traders to arbitrage the price around the rebase time.
 
@@ -35,9 +37,11 @@ Supply, price and balances over time:
 |5 | 1,211,986 | 1,009,988 |1.2   | 100,998      | 10.000%        | 49,833.3         | 4.934%         |  201,997  | 6,733  |  
 |6 | 1,118,394 | 1,016,722 |1.1   | 101,672      | 10.000%        | 50,165.6         | 4.934%         | 101,672   | 3,389  | 
 
-Bob gets 100,000 flexr at t=1 with an adjustment factor of 1,000,000 (the supply at t=1), and Alice gets 50,000 flexr with an ajdustment factor of 1,013,366.667 (the supply at t=3 when she gets her tokens).  See below for more on the [adjustement facto](#flexr-rebase-math)
+Bob gets 100,000 flexr at t=1 with an adjustment factor of 1,000,000 (the supply at t=1), and Alice gets 50,000 flexr with an ajdustment factor of 1,013,366.667 (the supply at t=3 when she gets her tokens).  See below for more on the [adjustement factor](#flexr-rebase-math).
 
-Note: there is no price change at t=4, so no rebase
+Note #2: Alice and Bob share remains constant despite the balance and price adjustments.  This is the invariant maintained by the rebase.
+
+Note #1: there is no price change at t=4, so no rebase needed.
 
 # The flexr ecosystem
 
@@ -61,6 +65,8 @@ In order to support flexr, it was necessary to introduce the following changes:
 - the main swaprs contract can be used for multiple pairs by leveraging traits, although it is very likely that the final version will need one contract deployed per pair anyway, but this can be the exact same contract, not a contract with hardcoded pair addresses, so a net benefit
 - liquidity providers now get a token for their share of liquidity they provide to a pair, allowing them to exchange it with others, or stake it (used by flexr's geyser!).  Uniswap v2 supports this as well.
 
+Note: technically, the new version of swapr is not part of this Hackaton submission, but shows how various contracts can leverage contracts for a rich ecosystem.  The changes, though, are fairly significant.
+
 ## The flexr token
 
 ### flexr rebase math
@@ -71,11 +77,16 @@ supply∆ = (current_price - price_target) * current_total_supply / price_target
 smoothed_supply∆ = supply∆ / 30
 ``` 
 
+Anyone can trigger a rebase, as long as it is past the previous rebase window (about 24 hours), so there is no reliance on an admin to do so.  You just pay the minimal transaction fee.
+
 ## The flexr Oracle
-see https://docs.pro.coinbase.com/#oracle for details on how to do it, but still missing secp256k1 signature verification (https://github.com/blockstack/stacks-blockchain/issues/1134)
+As Clarity does not support secp256k1 signature verification (see https://github.com/blockstack/stacks-blockchain/issues/1134, coming up shortly), it is using a dump oracle where a trusted party can supply the volume weighted average price for the previous period.  That price has to be provided within a small time period before the rebase can be triggered.
+
+Ultimately, once signature verification, the need for an Oracle contract will be removed, and a model like the [Coinbase Oracle](https://docs.pro.coinbase.com/#oracle) can be used by passing a signed price data payload to the [rebase](#flexr-rebase-math) function.  Again, removing the need for a trusted third party.  Decentralization FTW!
+
 
 ## The flexr Geyser
-Liquidity providers on swapr get a token representing their share of the liquity they provide on the flexr-wrapr pair (STX needs to be wrapped )
+Liquidity providers on swapr get a token representing their share of the liquity they provide on the flexr-wrapr pair (STX needs to be wrapped)
 
 ## Putting it all together
 (see more details in the [Scenario descrition](./scenario.md)) or the [tests](./test/unit/flexr.ts)
@@ -83,6 +94,11 @@ Liquidity providers on swapr get a token representing their share of the liquity
 
 # Gotchas
 To run the tests requires a patched version of the clarity-native-bin module to support setting STX balances from [balances.json](./balances.json)
-See https://github.com/blockstack/clarity-js-sdk/issues/77 for more details.  The real fix will need a bit more work than what was used
+See https://github.com/blockstack/clarity-js-sdk/issues/77 for more details.  The real fix will need a bit more work than what was used.  Happy to provide this patch to anyone, it is only a couple line changes.
+
+The flexr token can not use the native `ft-token` provided by Clarity, as the `ft-token` does not support dynamically changing the balance.  This means, however that you'd lose the safety provided by the post conditions on token transfer.  In fact, it would require new types of post conditions (check variable value, check map values, ...), which could be also helpful in other cases.
+
+The flexr token relies on `block-height` for defining the rebase window (144 blocks to be exact, which represents about 24 hours with a 10 minutes block average).  However, as the Clarity JS SDK does not allow for advancing to any block, that value has been reduced (to 3, artificially).  Having a function to advance to a given block would be highly beneficial to test these kind of use cases that are supposed to be long running.
+
 
 
