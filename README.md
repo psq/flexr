@@ -94,7 +94,7 @@ The flexr token implements the functions in the [SRC20 trait](#the-src20-token-t
 ```
 
 ### flexr rebase math
-During a rebase, everyone's balances get adjusted.  As this would not scale very well with a high number of holders, rebase calculate an adjustment factor to apply to apply to each balance, which gets finalized when exchanging the flexr token.
+During a rebase, everyone's balances get adjusted.  As this would not scale very well with a high number of holders, rebase calculate an adjustment factor to apply to each balance, which gets finalized when exchanging the flexr token.  `balance-of` also reflects that adjustment.
 
 ```
 supply∆ = (current_price - price_target) * current_total_supply / price_target
