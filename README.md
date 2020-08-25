@@ -125,16 +125,16 @@ The reward gets credited when the user unstakes their liquidity provider tokens 
 Most likely, the reward periods will be longer (months) to encourage long term holding.
 
 ## Putting it all together
-For more details, see a testing scenario [Scenario description](./scenario.md)) or the [tests](./test/unit/flexr.ts) that implement that scenario.  As Clarity JS SDK still does not support setting STX balances, this requires a special version of the client.  Fortunately, `clarity-bin` supports providing a [json](./balances.json) file.
+For more details, see a testing scenario [Scenario description](./scenario.md) or the [tests](./test/unit/flexr.ts) that implement that scenario.  As Clarity JS SDK still does not support setting STX balances, this requires a special version of the Clarity JS SDK.  Fortunately, `clarity-bin` supports providing a [json](./balances.json) file.
 
 
 # Gotchas
-To run the tests requires a patched version of the clarity-native-bin module to support setting STX balances from [balances.json](./balances.json)
-See https://github.com/blockstack/clarity-js-sdk/issues/77 for more details.  The real fix will need a bit more work than what was used.  Happy to provide this patch to anyone, it is only a couple line changes.
+To run the tests requires a patched version of the clarity-native-bin module to support setting STX balances from [balances.json](./balances.json).
+See https://github.com/blockstack/clarity-js-sdk/issues/77 for more details.  The real fix will need a bit more work than what was used to provide a more developer friendly experience.  Happy to provide this patch to anyone, it is only a couple lines.
 
-The flexr token can not use the native `ft-token` provided by Clarity, as the `ft-token` does not support dynamically changing the balance.  This means, however that you'd lose the safety provided by the post conditions on token transfer.  In fact, it would require new types of post conditions (check variable value, check map values, ...), which could be also helpful in other cases.
+The flexr token can not use the native `ft-token` provided by Clarity, as the `ft-token` does not support dynamically changing the balance as required by the flexr monetary policy.  This means, however that you lose the safety provided by the post conditions on token transfers.  In fact, it would require new types of post conditions (check variable value, check map values, ...), which could be also helpful in other cases.
 
-The flexr token relies on `block-height` for defining the rebase window (144 blocks to be exact, which represents about 24 hours with a 10 minutes block average).  However, as the Clarity JS SDK does not allow for advancing to any block, that value has been reduced (to 3, artificially).  Having a function to advance to a given block would be highly beneficial to test these kind of use cases that are supposed to be long running.
+The flexr token relies on `block-height` for defining the rebase window (144 blocks to be exact, which represents about 24 hours with a 10 minutes block average).  However, as the Clarity JS SDK does not allow for advancing to any block, that value has been artificially reduced (to 3).  Having a function to advance to a given block would be highly beneficial to test these kind of use cases that are supposed to be long running (weeks to months, so 1000s of blocks)
 
 
 
