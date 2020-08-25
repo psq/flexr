@@ -110,7 +110,7 @@ Ultimately, once the support for signature verification is added, the need for a
 
 
 ## The flexr Geyser
-Liquidity providers on swapr get a token representing their share of the liquity they provide on the flexr-wrapr pair (STX needs to be wrapped).  Not only do liquitity providers benefit by earning a fee on all swaps, they also benefit by staking their liquity token in exchange for higher and higher rewards the longer they stake their tokens.
+Liquidity providers on swapr get a token representing their share of the liquity they provide on the flexr-wrapr pair (STX needs to be wrapped to provide an SRC20 equivalent token).  Not only do liquitity providers benefit by earning a fee on all swaps, they also benefit by staking their liquity token in exchange for higher and higher rewards the longer they stake their tokens.
 
 The base reward is calculated as follow:
 ```
@@ -122,8 +122,10 @@ reward-factor is 3 for anything longer than 2000 blocks (> 2 weeks)
 
 The reward gets credited when the user unstakes their liquidity provider tokens (i.e. they gets their liquity token back, and their flexr reward).
 
+Most likely, the reward periods will be longer (months) to encourage long term holding.
+
 ## Putting it all together
-(see more details in the [Scenario description](./scenario.md)) or the [tests](./test/unit/flexr.ts).  As Clarity JS SDK still does not support setting STX balances, this requires a special version of the client.  Fortunately, `clarity-bin` supports providing a [json](./balances.json) file.
+For more details, see a testing scenario [Scenario description](./scenario.md)) or the [tests](./test/unit/flexr.ts) that implement that scenario.  As Clarity JS SDK still does not support setting STX balances, this requires a special version of the client.  Fortunately, `clarity-bin` supports providing a [json](./balances.json) file.
 
 
 # Gotchas
