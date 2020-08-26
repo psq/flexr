@@ -16,15 +16,15 @@
 )
 
 (define-public (name)
-  (contract-call? .swapr name .wrapr-token .flexr-token)
+  (contract-call? .swapr name .stx-token .flexr-token)
 )
 
 (define-public (balance-of (owner principal))
-  (contract-call? .swapr balance-of .wrapr-token .flexr-token owner)
+  (contract-call? .swapr balance-of .stx-token .flexr-token owner)
 )
 
 (define-public (total-supply)
-  (contract-call? .swapr total-supply .wrapr-token .flexr-token)
+  (contract-call? .swapr total-supply .stx-token .flexr-token)
 )
 
 ;; the extra mint method used by swapr
