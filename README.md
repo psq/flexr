@@ -155,4 +155,6 @@ The flexr token relies on `block-height` for defining the rebase window (144 blo
 However, as the Clarity JS SDK does not allow for advancing to any block, that value has been artificially reduced (to 3).  Having a function to advance to a given block would be highly beneficial to test these kind of use cases that are supposed to be long running (weeks to months, so 1000s of blocks)
 
 
+# Future work
+review whether `tx-sender` can be replaced by `contract-caller` in some instances
 

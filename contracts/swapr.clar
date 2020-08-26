@@ -293,7 +293,7 @@
                 (is-ok (as-contract (contract-call? token-y-trait transfer sender withdrawal-y)))
               )
               (begin
-                (decrease-shares token-x token-y tx-sender withdrawal)
+                (unwrap-panic (decrease-shares token-x token-y tx-sender withdrawal)) ;; should never fail, you know...
                 (map-set pairs-data-map ((token-x token-x) (token-y token-y))
                   (
                     (shares-total (- shares-total withdrawal))
