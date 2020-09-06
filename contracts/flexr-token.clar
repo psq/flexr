@@ -59,6 +59,17 @@
   (ok "flexr")
 )
 
+;; the token symbol
+(define-public (symbol)
+  (ok "FLX")
+)
+
+;; the number of decimals used
+(define-public (decimals)
+  (ok u6)
+)
+
+
 ;; can be run by anyone as long as the block height is farther enough from the previous rebase
 (define-public (rebase)
   (begin

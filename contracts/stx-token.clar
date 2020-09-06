@@ -20,7 +20,17 @@
   (ok "stx")
 )
 
+(define-public (symbol)
+  (ok "STX")
+)
+
+;; the number of decimals used
+(define-public (decimals)
+  (ok u6)
+)
+
 ;; Transfers tokens to a recipient
 (define-public (transfer (recipient principal) (amount uint))
   (stx-transfer? amount tx-sender recipient)
 )
+

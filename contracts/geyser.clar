@@ -43,7 +43,7 @@
         (var-set supply (- (var-get supply) amount))
         (let ((blocks (- block-height height)))
           (if (< blocks reward-period-1)
-            (unwrap-panic (send-back tx-sender amount blocks reward1))
+            (send-back tx-sender amount blocks reward1)
             (if (< blocks reward-period-2)
               (send-back tx-sender amount blocks reward2)
               (send-back tx-sender amount blocks reward3)

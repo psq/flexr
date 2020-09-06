@@ -19,6 +19,15 @@
   (contract-call? .swapr name .stx-token .flexr-token)
 )
 
+(define-public (symbol)
+  (contract-call? .swapr symbol .stx-token .flexr-token)
+)
+
+;; the number of decimals used
+(define-public (decimals)
+  (ok u6)  ;; arbitrary, but of little use probably
+)
+
 (define-public (balance-of (owner principal))
   (contract-call? .swapr balance-of .stx-token .flexr-token owner)
 )

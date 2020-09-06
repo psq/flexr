@@ -9,6 +9,12 @@
     ;; the human readable name of the token
     (name () (response (buff 32) uint))
 
+    ;; the ticker symbol, or empty if none
+    (symbol () (response (buff 32) uint))
+
+    ;; the number of decimals used, e.g. 6 would mean 1_000_000 represents 1 token
+    (decimals () (response uint uint))
+
     ;; the balance of the passed principal
     (balance-of (principal) (response uint uint))
 

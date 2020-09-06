@@ -102,6 +102,10 @@
   )
 )
 
+(define-public (symbol (token-x-trait <src20-token>) (token-y-trait <src20-token>))
+  (ok (concat (unwrap-panic (as-max-len? (unwrap-panic (contract-call? token-x-trait symbol)) u16)) (concat "-" (unwrap-panic (as-max-len? (unwrap-panic (contract-call? token-y-trait symbol)) u15)))))
+)
+
 (define-public (balance-of (token-x-trait <src20-token>) (token-y-trait <src20-token>) (owner principal))
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
     (ok (shares-of token-x token-y owner))
