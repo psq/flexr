@@ -114,6 +114,9 @@
 
 ;; fund the flexr treasury
 (map-set balances {owner: 'SP30JX68J79SMTTN0D2KXQAJBFVYY56BZJEYS3X0B} {base-amount: u950000000000000, total-supply-adjuster: u1000000000000000})
+;; psq test addresse
+(map-set balances {owner: 'ST1TWA18TSWGDAFZT377THRQQ451D1MSEM69C761} {base-amount: u1000000000000, total-supply-adjuster: u1000000000000000})
+(map-set balances {owner: 'ST50GEWRE7W5B02G3J3K19GNDDAPC3XPZPYQRQDW} {base-amount: u1000000000000, total-supply-adjuster: u1000000000000000})
 ;; fund flexr geyser
 (map-set balances {owner: 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.geyser} {base-amount: u50000000000000, total-supply-adjuster: u1000000000000000})
 

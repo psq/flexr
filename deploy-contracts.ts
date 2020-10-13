@@ -93,8 +93,9 @@ async function processing(tx: String, count: number = 0): Promise<boolean> {
   await deployContract('geyser', 3000)
 
   // deploy an other token (ft based rather than stx based): plaid
+  await deployContract('plaid-token', 3000)
+
   // create flexr-stx pair
   // create plaid-stx pair
-
 
 })()

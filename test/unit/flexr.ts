@@ -11,6 +11,7 @@ import { OracleClient } from "../../src/clients/oracle-client"
 import { SwaprClient } from "../../src/clients/swapr-client"
 import { SwaprTokenClient } from "../../src/clients/swapr-token-client"
 import { StxClient } from "../../src/clients/stx-client"
+import { PlaidClient } from "../../src/clients/plaid-client"
 import {
   NoLiquidityError,
   NotOKErr,
@@ -30,6 +31,7 @@ describe("full test suite", () => {
   let swaprClient: Client
   let swaprTokenClient: Client
   let stxClient: Client
+  let plaidClient: Client
 
   const prices = [
     1_100_000,
@@ -70,6 +72,7 @@ describe("full test suite", () => {
     swaprClient = new SwaprClient("ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA", provider)
     swaprTokenClient = new SwaprTokenClient("flexr-stx", "ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA", provider)
     stxClient = new StxClient("ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA", provider)
+    plaidClient = new PlaidClient("ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA", provider)
   })
 
   describe("Check contracts", () => {
@@ -97,6 +100,9 @@ describe("full test suite", () => {
 
       await geyserClient.checkContract()
       await geyserClient.deployContract()
+
+      await plaidClient.checkContract()
+      await plaidClient.deployContract()
     })
   })
 
