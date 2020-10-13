@@ -20,21 +20,26 @@
 (define-data-var supply uint u0)
 
 ;; stake token
-;; pass in a swapr token for the FLEXR-WRAPR pair token and amount
+;; pass in a swapr token for the FLEXR-STX pair token and amount
 (define-public (stake (amount uint))
-  (if (is-ok (contract-call? .swapr-token transfer (as-contract tx-sender) amount))
-    (let ((prior-amount (default-to u0 (get amount (map-get? balances {owner: tx-sender})))))
-      (map-set balances {owner: tx-sender} {amount: amount, height: block-height})
-      (var-set supply (+ (var-get supply) amount))
-      (ok true)
+  (begin
+    (print "geyser.stake")
+    (print amount)
+    (if (is-ok (contract-call? 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.swapr-token transfer (as-contract tx-sender) amount))
+      (let ((prior-amount (default-to u0 (get amount (map-get? balances {owner: tx-sender})))))
+        (print prior-amount)
+        (map-set balances {owner: tx-sender} {amount: (+ amount prior-amount), height: block-height})
+        (var-set supply (+ (var-get supply) amount))
+        (ok true)
+      )
+      (err transfer-fail-err)
     )
-    (err transfer-fail-err)
   )
 )
 
 
 ;; unstake token
-;; collect back the FLEXR-WRAPR pair token and FLEXR reward
+;; collect back the FLEXR-STX pair token and FLEXR reward
 ;; reward is based on number of block token was staked (1000 blocks => x1, 2000 blocks => 2x, 3000 blocks => 3x)
 (define-public (unstake)
   (let ((balance (map-get? balances {owner: tx-sender})))
@@ -60,8 +65,15 @@
 ;; reward is amount * reward-factor * #blocks / reward-period per 1000 swapr-flexr-wrapr token in flexr tokens
 (define-private (send-back (recipient principal) (amount uint) (blocks uint) (reward-factor uint))
   (let ((reward-amount (/ (* amount (* blocks reward-factor)) (* u1000 reward-period))))
-    (if (is-ok (as-contract (contract-call? .swapr-token transfer recipient amount)))
-      (if (is-ok (as-contract (contract-call? .flexr-token transfer recipient reward-amount)))
+    (print "geyser.send-back")
+    (print recipient)
+    (print amount)
+    (print blocks)
+    (print reward-factor)
+    (print reward-amount)
+    (print (as-contract tx-sender))
+    (if (is-ok (as-contract (contract-call? 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.swapr-token transfer recipient amount)))
+      (if (is-ok (as-contract (contract-call? 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.flexr-token transfer recipient reward-amount)))
         (ok true)
         (err reward-transfer-failed-err)
       )

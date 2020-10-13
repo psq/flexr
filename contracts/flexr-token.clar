@@ -1,4 +1,4 @@
-;; (impl-trait .src20-trait.token)
+;; (impl-trait 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.src20-trait.token)
 
 (define-constant too-soon-err u10)
 (define-constant balance-too-low-err u11)
@@ -20,11 +20,26 @@
 )
 
 (define-private (balance-set (recipient principal) (amount uint))
-  (map-set balances {owner: recipient} {base-amount: amount, total-supply-adjuster: (to-uint (var-get supply))})
+  (begin
+    (print "flexr.balance-set")
+    (print recipient)
+    (print amount)
+    (print (var-get supply))
+    (print (map-set balances {owner: recipient} {base-amount: amount, total-supply-adjuster: (to-uint (var-get supply))}))
+  )
 )
 
 (define-public (transfer (recipient principal) (amount uint))
   (let ((balance-sender (unwrap-panic (balance-of tx-sender))) (balance-recipient (unwrap-panic (balance-of recipient))))
+    (print "flexr.transfer")
+    (print tx-sender)
+    (print contract-caller)
+    (print recipient)
+    (print amount)
+    (print "balance-sender")
+    (print balance-sender)
+    (print "balance-recipient")
+    (print balance-recipient)
     (if (>= balance-sender amount)
       (begin
         (balance-set tx-sender (- balance-sender amount))
@@ -86,7 +101,7 @@
 
 ;; internal calculation of the smoothed supply adjustment
 (define-private (run-rebase)
-  (let ((current-price-data (contract-call? .oracle get-price)))
+  (let ((current-price-data (contract-call? 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.oracle get-price)))
     (let ((current-price (get price current-price-data)))
       (let ((supply-delta (/ (* (- (to-int current-price) target-price) (var-get supply)) target-price)))
         (let ((supply-delta-smoothed (/ supply-delta (to-int rebase-lag))))
@@ -98,7 +113,7 @@
 )
 
 ;; fund the flexr treasury
-(map-set balances {owner: 'SP1EHFWKXQEQD7TW9WWRGSGJFJ52XNGN6MTJ7X462} {base-amount: u950000000000000, total-supply-adjuster: u1000000000000000})
+(map-set balances {owner: 'SP30JX68J79SMTTN0D2KXQAJBFVYY56BZJEYS3X0B} {base-amount: u950000000000000, total-supply-adjuster: u1000000000000000})
 ;; fund flexr geyser
-(map-set balances {owner: 'S1G2081040G2081040G2081040G208105NK8PE5.geyser} {base-amount: u50000000000000, total-supply-adjuster: u1000000000000000})
+(map-set balances {owner: 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.geyser} {base-amount: u50000000000000, total-supply-adjuster: u1000000000000000})
 

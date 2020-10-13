@@ -4,8 +4,8 @@
 (define-trait swapr-trait
   (
     (transfer (principal uint) (response bool uint))
-    (name () (response (buff 32) uint))
-    (symbol () (response (buff 32) uint))
+    (name () (response (string-ascii 32) uint))
+    (symbol () (response (string-ascii 32) uint))
     (decimals () (response uint uint))
     (balance-of (principal) (response uint uint))
     (total-supply () (response uint uint))

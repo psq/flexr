@@ -16,7 +16,7 @@ export class SwaprTokenClient extends Client {
   constructor(name: string, principal: string, provider: Provider) {
     super(
       `${principal}.swapr-token`,
-      'swapr-token-flexr-wrapr',
+      'swapr-token',
       provider
     )
     this.token_name = name
@@ -44,6 +44,7 @@ export class SwaprTokenClient extends Client {
       },
     })
     const receipt = await this.submitQuery(query)
+    console.log("balanceOf.receipt", receipt)
     return Result.unwrapUInt(receipt)
   }
 

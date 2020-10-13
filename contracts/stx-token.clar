@@ -1,10 +1,11 @@
 ;; wrap the native STX token into an SRC20 compatible token to be usable along other tokens
-(impl-trait .src20-trait.src20-trait)
+;; (use-trait src20-token .src20-trait.src20-trait)
+(impl-trait 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.src20-trait.src20-trait)
 
 ;; get the token balance of owner
 (define-read-only (balance-of (owner principal))
   (begin
-    (ok (stx-get-balance owner))
+    (ok (print (stx-get-balance owner)))
   )
 )
 
@@ -31,6 +32,12 @@
 
 ;; Transfers tokens to a recipient
 (define-public (transfer (recipient principal) (amount uint))
-  (stx-transfer? amount tx-sender recipient)
+  (begin
+    (print "stx.transfer")
+    (print amount)
+    (print tx-sender)
+    (print recipient)
+    (print (stx-transfer? amount tx-sender recipient))
+  )
 )
 

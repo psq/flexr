@@ -1,13 +1,7 @@
-;; (use-trait src20-token
-;;     'SP2NC4YKZWM2YMCJV851VF278H9J50ZSNM33P3JM1.my-token.src20-token)
-;; (use-trait y-token
-;;     'SP1QR3RAGH3GEME9WV7XB0TZCX6D5MNDQP97D35EH.my-token.src20-token)
-;; TODO(psq): traits still have some issues, so will enable later.  One of the issue was fixed on 5/28, but there may be others, so try the fix when available in new builds
+(use-trait src20-token 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.src20-trait.src20-trait)
+(use-trait swapr-token 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.swapr-trait.swapr-trait)
 
-(use-trait src20-token 'S1G2081040G2081040G2081040G208105NK8PE5.src20-trait.src20-trait)
-(use-trait swapr-token 'S1G2081040G2081040G2081040G208105NK8PE5.swapr-trait.swapr-trait)
-
-(define-constant contract-owner 'SZ2J6ZY48GV1EZ5V2V5RB9MP66SW86PYKKQ9H6DPR)
+(define-constant contract-owner 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA)
 (define-constant no-liquidity-err (err u61))
 (define-constant transfer-failed-err (err u62))
 (define-constant not-owner-err (err u63))
@@ -64,19 +58,19 @@
     (fee-balance-y uint)
     (fee-to-address (optional principal))
     (swapr-token principal)
-    (name (buff 32))
+    (name (string-ascii 32))
   )
 )
 
 ;; TODO(psq): replace use of balance-x/balance-y with a call to balance-of(swapr) on the token itself, no write to do actually!!!  The transfer is the write, that's cool :)
 
 
-(define-map shares-map
-  ((token-x principal) (token-y principal) (owner principal))
-  ((shares uint))
-)
+;; (define-map shares-map
+;;   ((token-x principal) (token-y principal) (owner principal))
+;;   ((shares uint))
+;; )
 
-(define-data-var pairs-list (list 2000 uint) (list))
+;; (define-data-var pairs-list (list 2000 uint) (list))
 (define-data-var pair-count uint u0)
 
 
@@ -106,11 +100,17 @@
   (ok (concat (unwrap-panic (as-max-len? (unwrap-panic (contract-call? token-x-trait symbol)) u16)) (concat "-" (unwrap-panic (as-max-len? (unwrap-panic (contract-call? token-y-trait symbol)) u15)))))
 )
 
-(define-public (balance-of (token-x-trait <src20-token>) (token-y-trait <src20-token>) (owner principal))
-  (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
-    (ok (shares-of token-x token-y owner))
-  )
-)
+;; (define-public (balance-of (token-x-trait <src20-token>) (token-y-trait <src20-token>) (owner principal))
+;;   (begin
+;;     (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
+;;       (print "swapr.balance-of")
+;;       (print token-x)
+;;       (print token-y)
+;;       (print owner)
+;;       (ok (print (shares-of token-x token-y owner)))
+;;     )
+;;   )
+;; )
 
 (define-public (total-supply (token-x-trait <src20-token>) (token-y-trait <src20-token>))
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
@@ -122,18 +122,18 @@
 
 
 ;; wrappers to get an owner's position
-(define-private (shares-of (token-x principal) (token-y principal) (owner principal))
-  (default-to u0
-    (get shares
-      (map-get? shares-map ((token-x token-x) (token-y token-y) (owner owner)))
-    )
-  )
-)
+;; (define-private (shares-of (token-x principal) (token-y principal) (owner principal))
+;;   (default-to u0
+;;     (get shares
+;;       (map-get? shares-map ((token-x token-x) (token-y token-y) (owner owner)))
+;;     )
+;;   )
+;; )
 
 ;; get the number of shares of the pool for owner
-(define-read-only (get-shares-of (token-x principal) (token-y principal) (owner principal))
-  (ok (shares-of token-x token-y owner))
-)
+;; (define-read-only (get-shares-of (token-x principal) (token-y principal) (owner principal))
+;;   (ok (shares-of token-x token-y owner))
+;; )
 
 ;; get the total number of shares in the pool
 (define-read-only (get-shares (token-x principal) (token-y principal))
@@ -148,43 +148,49 @@
   )
 )
 
-(define-public (get-balances-of (token-x-trait <src20-token>) (token-y-trait <src20-token>) (owner principal))
-  (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
-    (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
-      (let ((x (balance token-x-trait)) (y (balance token-y-trait)) (shares-total (get shares-total pair)) (shares (shares-of token-x token-y owner)))
-        (if (> shares-total u0)
-          (ok (list (/ (* x shares) shares-total) (/ (* y shares) shares-total)))  ;; less precision loss doing * first
-          no-liquidity-err  ;; no liquidity
-        )
-      )
-    )
-  )
-)
+;; (define-public (get-balances-of (token-x-trait <src20-token>) (token-y-trait <src20-token>) (owner principal))
+;;   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
+;;     (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
+;;       (let ((x (balance token-x-trait)) (y (balance token-y-trait)) (shares-total (get shares-total pair)) (shares (shares-of token-x token-y owner)))
+;;         (if (> shares-total u0)
+;;           (ok (list (/ (* x shares) shares-total) (/ (* y shares) shares-total)))  ;; less precision loss doing * first
+;;           no-liquidity-err  ;; no liquidity
+;;         )
+;;       )
+;;     )
+;;   )
+;; )
 
-(define-private (increase-shares (token-x principal) (token-y principal) (owner principal) (amount uint))
-  (let ((shares (shares-of token-x token-y owner)))
-    (map-set shares-map
-      ((token-x token-x) (token-y token-y) (owner owner))
-      ((shares (+ shares amount)))
-    )
-    (ok true)
-  )
-)
+;; (define-private (increase-shares (token-x principal) (token-y principal) (owner principal) (amount uint))
+;;   (let ((shares (shares-of token-x token-y owner)))
+;;     (print "swapr.increase-shares")
+;;     (print token-x)
+;;     (print token-y)
+;;     (print owner)
+;;     (print shares)
+;;     (print amount)
+;;     (print (map-set shares-map
+;;       ((token-x token-x) (token-y token-y) (owner owner))
+;;       ((shares (+ shares amount)))
+;;     ))
+;;     (ok true)
+;;   )
+;; )
 
-(define-private (decrease-shares (token-x principal) (token-y principal) (owner principal) (amount uint))
-  (let ((shares (shares-of token-x token-y owner)))
-    (if (< amount shares)
-      (begin
-        (map-set shares-map
-          ((token-x token-x) (token-y token-y) (owner owner))
-          ((shares (- shares amount)))
-        )
-        (ok true)
-      )
-      balance-too-low-err
-    )
-  )
-)
+;; (define-private (decrease-shares (token-x principal) (token-y principal) (owner principal) (amount uint))
+;;   (let ((shares (shares-of token-x token-y owner)))
+;;     (if (< amount shares)
+;;       (begin
+;;         (map-set shares-map
+;;           ((token-x token-x) (token-y token-y) (owner owner))
+;;           ((shares (- shares amount)))
+;;         )
+;;         (ok true)
+;;       )
+;;       balance-too-low-err
+;;     )
+;;   )
+;; )
 
 ;; get overall balances for the pair
 (define-public (get-balances (token-x-trait <src20-token>) (token-y-trait <src20-token>))
@@ -209,19 +215,20 @@
           (is-ok (contract-call? token-y-trait transfer contract-address y))
         )
         (begin
-          (let ((shares-total (if (is-eq (get shares-total pair) u0)
-                  (begin
-                    (increase-shares token-x token-y tx-sender x)
-                    x
+          (print "calculate new-shares")
+          (let ((new-shares (if (is-eq (print (get shares-total pair)) u0)
+                  (let ((shares (sqrti (* x y))))
+                    ;; (increase-shares token-x token-y tx-sender shares)
+                    shares
                   )
-                  (let ((new-shares (* (/ x (balance token-x-trait)) (get shares-total pair))))
-                    (increase-shares token-x token-y tx-sender new-shares)
-                    (+ new-shares (get shares-total pair))
+                  (let ((shares (/ (* (print x) (print (get shares-total pair))) (print (balance token-x-trait)))))
+                    ;; (increase-shares token-x token-y tx-sender shares)
+                    shares
                   )
                 )))
             (map-set pairs-data-map ((token-x token-x) (token-y token-y))
               (
-                (shares-total shares-total)
+                (shares-total (+ new-shares (get shares-total pair)))
                 (fee-balance-x (get fee-balance-x pair))
                 (fee-balance-y (get fee-balance-y pair))
                 (fee-to-address (get fee-to-address pair))
@@ -229,7 +236,12 @@
                 (swapr-token (get swapr-token pair))
               )
             )
-            (contract-call? token-swapr-trait mint recipient-address shares-total)
+            (print "token-swapr-trait.mint params")
+            (print x)
+            (print y)
+            (print recipient-address)
+            (print new-shares)
+            (print (contract-call? token-swapr-trait mint recipient-address new-shares))
           )
         )
         (begin
@@ -248,11 +260,15 @@
   (unwrap-panic (map-get? pairs-map ((pair-id pair-id))))
 )
 
-(define-read-only (get-pairs)
-  (ok (map get-pair-contracts (var-get pairs-list)))
+(define-read-only (get-pair-count)
+  (ok (var-get pair-count))
 )
 
-(define-public (create-pair (token-x-trait <src20-token>) (token-y-trait <src20-token>) (token-swapr-trait <swapr-token>) (pair-name (buff 32)) (x uint) (y uint))
+;; (define-read-only (get-pairs)
+;;   (ok (map get-pair-contracts (var-get pairs-list)))
+;; )
+
+(define-public (create-pair (token-x-trait <src20-token>) (token-y-trait <src20-token>) (token-swapr-trait <swapr-token>) (pair-name (string-ascii 32)) (x uint) (y uint))
   ;; TOOD(psq): add creation checks, then create map before proceeding to add-to-position
   ;; check neither x,y or y,x exists`
   (let ((name-x (unwrap-panic (contract-call? token-x-trait name))) (name-y (unwrap-panic (contract-call? token-y-trait name))))
@@ -270,7 +286,7 @@
             )
           )
           (map-set pairs-map ((pair-id pair-id)) ((token-x token-x) (token-y token-y)))
-          (var-set pairs-list (unwrap! (as-max-len? (append (var-get pairs-list) pair-id) u2000) too-many-pairs-err))
+          ;; (var-set pairs-list (unwrap! (as-max-len? (append (var-get pairs-list) pair-id) u2000) too-many-pairs-err))
           (var-set pair-count pair-id)
           (add-to-position token-x-trait token-y-trait token-swapr-trait x y)
         )
@@ -287,7 +303,7 @@
 (define-public (reduce-position (token-x-trait <src20-token>) (token-y-trait <src20-token>) (token-swapr-trait <swapr-token>) (percent uint))
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
     (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
-      (let ((shares (shares-of tx-sender)) (shares-total (get shares-total pair)) (contract-address (as-contract tx-sender)) (sender tx-sender))
+      (let ((shares (unwrap-panic (contract-call? token-swapr-trait balance-of tx-sender))) (shares-total (get shares-total pair)) (contract-address (as-contract tx-sender)) (sender tx-sender))
         (let ((withdrawal (/ (* shares percent) u100)))
           (let ((withdrawal-x (/ (* withdrawal (balance token-x-trait)) shares-total)) (withdrawal-y (/ (* withdrawal (balance token-y-trait)) shares-total)))
             (if
@@ -297,7 +313,7 @@
                 (is-ok (as-contract (contract-call? token-y-trait transfer sender withdrawal-y)))
               )
               (begin
-                (unwrap-panic (decrease-shares token-x token-y tx-sender withdrawal)) ;; should never fail, you know...
+                ;; (unwrap-panic (decrease-shares token-x token-y tx-sender withdrawal)) ;; should never fail, you know...
                 (map-set pairs-data-map ((token-x token-x) (token-y token-y))
                   (
                     (shares-total (- shares-total withdrawal))

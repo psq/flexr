@@ -47,7 +47,7 @@ export class SwaprClient extends Client {
     await tx.sign(params.sender)
     const receipt = await this.submitTransaction(tx)
     if (receipt.success) {
-      // console.log(receipt.debugOutput)
+      console.log(receipt.debugOutput)
       const result = Result.unwrap(receipt)
       return result.startsWith('Transaction executed and committed. Returned: true')
     }
