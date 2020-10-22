@@ -16,7 +16,7 @@ const keys = JSON.parse(
 console.log("keys", keys)
 const mode = process.argv[2] || 'mocknet'
 
-console.log("deploying swapr with", keys.stacksAddress, "on", mode)
+console.log("deploying swapr with", keys.swapr.stacksAddress, "on", mode)
 
 const STACKS_API_URL = mode === 'mocknet' ? 'http://localhost:3999' : 'https://stacks-node-api.blockstack.org'
 const network = new StacksTestnet()
@@ -30,7 +30,7 @@ async function deployContract(contract_name: string, fee: number) {
   const transaction = await makeContractDeploy({
     contractName: contract_name,
     codeBody,
-    senderKey: keys.privateKey,
+    senderKey: keys.swapr.privateKey,
     network,
   })
 
@@ -89,7 +89,9 @@ async function processing(tx: String, count: number = 0): Promise<boolean> {
   await deployContract('stx-token', 3000)
   await deployContract('oracle', 3000)
   await deployContract('flexr-token', 3000)
-  await deployContract('swapr-token', 3000)
+  await deployContract('flexr-stx-token', 3000)
+  await deployContract('plaid-token', 3000)
+  await deployContract('plaid-stx-token', 3000)
   await deployContract('geyser', 3000)
 
   // deploy an other token (ft based rather than stx based): plaid

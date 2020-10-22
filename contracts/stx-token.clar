@@ -12,21 +12,21 @@
 ;; returns the total number of tokens
 ;; TODO(psq): we don't have access yet, but once POX is available, this should be a value that
 ;; is available from Clarity
-(define-public (total-supply)
+(define-read-only (total-supply)
   (ok u0)
 )
 
 ;; returns the token name
-(define-public (name)
+(define-read-only (name)
   (ok "stx")
 )
 
-(define-public (symbol)
+(define-read-only (symbol)
   (ok "STX")
 )
 
 ;; the number of decimals used
-(define-public (decimals)
+(define-read-only (decimals)
   (ok u6)
 )
 

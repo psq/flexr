@@ -14,21 +14,21 @@
 ;; returns the total number of tokens
 ;; TODO(psq): we don't have access yet, but once POX is available, this should be a value that
 ;; is available from Clarity
-(define-public (total-supply)
+(define-read-only (total-supply)
   (ok u0)
 )
 
 ;; returns the token name
-(define-public (name)
+(define-read-only (name)
   (ok "Plaid")
 )
 
-(define-public (symbol)
+(define-read-only (symbol)
   (ok "PLD")
 )
 
 ;; the number of decimals used
-(define-public (decimals)
+(define-read-only (decimals)
   (ok u8)
 )
 
@@ -43,6 +43,6 @@
   )
 )
 
-(ft-mint? plaid u1000000000000 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA)
-(ft-mint? plaid u1000000000000 'ST1TWA18TSWGDAFZT377THRQQ451D1MSEM69C761)
-(ft-mint? plaid u1000000000000 'ST50GEWRE7W5B02G3J3K19GNDDAPC3XPZPYQRQDW)
+(ft-mint? plaid u100000000000000 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA)
+(ft-mint? plaid u100000000000000 'ST1TWA18TSWGDAFZT377THRQQ451D1MSEM69C761)
+(ft-mint? plaid u100000000000000 'ST50GEWRE7W5B02G3J3K19GNDDAPC3XPZPYQRQDW)

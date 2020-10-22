@@ -9,7 +9,8 @@ import { FlexrClient } from "../../src/clients/flexr-client"
 import { GeyserClient } from "../../src/clients/geyser-client"
 import { OracleClient } from "../../src/clients/oracle-client"
 import { SwaprClient } from "../../src/clients/swapr-client"
-import { SwaprTokenClient } from "../../src/clients/swapr-token-client"
+import { FlexrStxTokenClient } from "../../src/clients/flexr-stx-token-client"
+import { PlaidStxTokenClient } from "../../src/clients/plaid-stx-token-client"
 import { StxClient } from "../../src/clients/stx-client"
 import { PlaidClient } from "../../src/clients/plaid-client"
 import {
@@ -29,9 +30,10 @@ describe("full test suite", () => {
   let geyserClient: Client
   let oracleClient: Client
   let swaprClient: Client
-  let swaprTokenClient: Client
+  let flexrStxTokenClient: Client
   let stxClient: Client
   let plaidClient: Client
+  let plaidStxTokenClient: Client
 
   const prices = [
     1_100_000,
@@ -57,7 +59,7 @@ describe("full test suite", () => {
   const zoe = addresses[2]
   const flexr_treasury = `${addresses[4]}`
   const flexr_token = `ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.flexr-token`
-  const swapr_token = `ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.swapr-token`
+  const flexr_stx_token = `ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.flexr-stx-token`
   const stx_token = `ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.stx-token`
 
   before(async () => {
@@ -70,18 +72,19 @@ describe("full test suite", () => {
     geyserClient = new GeyserClient("ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA", provider)
     oracleClient = new OracleClient("ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA", provider)
     swaprClient = new SwaprClient("ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA", provider)
-    swaprTokenClient = new SwaprTokenClient("flexr-stx", "ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA", provider)
+    flexrStxTokenClient = new FlexrStxTokenClient("flexr-stx", "ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA", provider)
     stxClient = new StxClient("ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA", provider)
     plaidClient = new PlaidClient("ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA", provider)
+    plaidStxTokenClient = new PlaidStxTokenClient("[plaid]-stx", "ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA", provider)
   })
 
   describe("Check contracts", () => {
     it("should have a valid syntax", async () => {
       await src20TraitClient.checkContract()
-      await src20TraitClient.deployContract() // deploy first
+      await src20TraitClient.deployContract()
 
       await swaprTraitClient.checkContract()
-      await swaprTraitClient.deployContract() // deploy first
+      await swaprTraitClient.deployContract()
 
       await swaprClient.checkContract()
       await swaprClient.deployContract()
@@ -95,14 +98,17 @@ describe("full test suite", () => {
       await flexrClient.checkContract()
       await flexrClient.deployContract()
 
-      await swaprTokenClient.checkContract()
-      await swaprTokenClient.deployContract() // deploy second
+      await flexrStxTokenClient.checkContract()
+      await flexrStxTokenClient.deployContract()
 
       await geyserClient.checkContract()
       await geyserClient.deployContract()
 
       await plaidClient.checkContract()
       await plaidClient.deployContract()
+
+      await plaidStxTokenClient.checkContract()
+      await plaidStxTokenClient.deployContract()
     })
   })
 
@@ -114,7 +120,7 @@ describe("full test suite", () => {
 
       // create flerx-swapr pair
       console.log("======>  createPair.treasury")
-      assert(await swaprClient.createPair(flexr_token, stx_token, swapr_token, "flexr-stx", 50_000_000_000_000, 50_000_000_000_000, {sender: flexr_treasury}), "createPair did not return true")
+      assert(await swaprClient.createPair(flexr_token, stx_token, flexr_stx_token, "flexr-stx", 50_000_000_000_000, 50_000_000_000_000, {sender: flexr_treasury}), "createPair did not return true")
 
 
       // // Alice wraps STX
@@ -125,13 +131,13 @@ describe("full test suite", () => {
       assert(await swaprClient.swapYforExactX(flexr_token, stx_token, 40_000_000_000, {sender: alice}))
       // Alice add a position on swapr's flexr-stx pair
       console.log("======>  addToPosition.alice")
-      assert(await swaprClient.addToPosition(flexr_token, stx_token, swapr_token, 40_000_000_000, 40_000_000_000, {sender: alice}), "addToPosition did not return true")
+      assert(await swaprClient.addToPosition(flexr_token, stx_token, flexr_stx_token, 40_000_000_000, 40_000_000_000, {sender: alice}), "addToPosition did not return true")
       // Alice stakes her position on geyser
       console.log("======>  stake.alice")
-      assert.equal(await swaprTokenClient.balanceOf(alice, {sender: alice}), 40_000_000_000)
+      assert.equal(await flexrStxTokenClient.balanceOf(alice, {sender: alice}), 40_000_000_000)
       assert(await geyserClient.stake(40_000_000_000, {sender: alice}), "stake did not return true")
       assert.equal(await flexrClient.balanceOf(alice, {sender: alice}), 0)
-      assert.equal(await swaprTokenClient.balanceOf(alice, {sender: alice}), 0)
+      assert.equal(await flexrStxTokenClient.balanceOf(alice, {sender: alice}), 0)
 
       // // Bob wraps STX
       // console.log("======>  wrap.bob")
@@ -168,7 +174,7 @@ describe("full test suite", () => {
     it("check balances after running scenario", async () => {
       // Alice checks the fees she collected
       assert.equal(await flexrClient.balanceOf(alice, {sender: alice}), 880_000)
-      assert.equal(await swaprTokenClient.balanceOf(alice, {sender: alice}), 40_000_000_000)
+      assert.equal(await flexrStxTokenClient.balanceOf(alice, {sender: alice}), 40_000_000_000)
 
       // total FLEXR supply
       assert.equal(await flexrClient.totalSupply({sender: alice}), 1_014_873_127_537_500) // starting value: 1_000_000_000_000_000

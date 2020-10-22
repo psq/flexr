@@ -65,22 +65,22 @@
 )
 
 ;; ;; returns the total number of tokens
-(define-public (total-supply)
+(define-read-only (total-supply)
   (ok (to-uint (var-get supply)))
 )
 
 ;; returns the token name
-(define-public (name)
+(define-read-only (name)
   (ok "flexr")
 )
 
 ;; the token symbol
-(define-public (symbol)
+(define-read-only (symbol)
   (ok "FLX")
 )
 
 ;; the number of decimals used
-(define-public (decimals)
+(define-read-only (decimals)
   (ok u6)
 )
 
@@ -114,7 +114,9 @@
 
 ;; fund the flexr treasury
 (map-set balances {owner: 'SP30JX68J79SMTTN0D2KXQAJBFVYY56BZJEYS3X0B} {base-amount: u950000000000000, total-supply-adjuster: u1000000000000000})
-;; psq test addresse
+;; swapr test address
+(map-set balances {owner: 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA} {base-amount: u100000000000000, total-supply-adjuster: u1000000000000000})
+;; psq test address
 (map-set balances {owner: 'ST1TWA18TSWGDAFZT377THRQQ451D1MSEM69C761} {base-amount: u1000000000000, total-supply-adjuster: u1000000000000000})
 (map-set balances {owner: 'ST50GEWRE7W5B02G3J3K19GNDDAPC3XPZPYQRQDW} {base-amount: u1000000000000, total-supply-adjuster: u1000000000000000})
 ;; fund flexr geyser

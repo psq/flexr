@@ -88,7 +88,7 @@
 ;;   )
 ;; )
 
-(define-public (name (token-x-trait <src20-token>) (token-y-trait <src20-token>))
+(define-read-only (name (token-x-trait <src20-token>) (token-y-trait <src20-token>))
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
     (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
       (ok (get name pair))
@@ -96,8 +96,10 @@
   )
 )
 
-(define-public (symbol (token-x-trait <src20-token>) (token-y-trait <src20-token>))
-  (ok (concat (unwrap-panic (as-max-len? (unwrap-panic (contract-call? token-x-trait symbol)) u16)) (concat "-" (unwrap-panic (as-max-len? (unwrap-panic (contract-call? token-y-trait symbol)) u15)))))
+(define-read-only (symbol (token-x-trait <src20-token>) (token-y-trait <src20-token>))
+  (contract-call? ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.plaid-token symbol)
+  ;; (contract-call? token-y-trait symbol)
+  ;; (ok (concat (unwrap-panic (as-max-len? (unwrap-panic (contract-call? token-x-trait symbol)) u16)) (concat "-" (unwrap-panic (as-max-len? (unwrap-panic (contract-call? token-y-trait symbol)) u15)))))
 )
 
 ;; (define-public (balance-of (token-x-trait <src20-token>) (token-y-trait <src20-token>) (owner principal))
@@ -112,7 +114,7 @@
 ;;   )
 ;; )
 
-(define-public (total-supply (token-x-trait <src20-token>) (token-y-trait <src20-token>))
+(define-read-only (total-supply (token-x-trait <src20-token>) (token-y-trait <src20-token>))
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
     (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
       (ok (get shares-total pair))
