@@ -5,6 +5,8 @@ const chai = require('chai')
 chai.use(require('chai-string'))
 const assert = chai.assert
 
+import { providerWithInitialAllocations } from "./providerWithInitialAllocations";
+
 import { FlexrClient } from "../../src/clients/flexr-client"
 import { GeyserClient } from "../../src/clients/geyser-client"
 import { OracleClient } from "../../src/clients/oracle-client"
@@ -19,6 +21,10 @@ import {
   NotOwnerError,
   TransferError,
 } from '../../src/errors'
+
+import * as balances from '../../balances.json'
+
+console.log(balances)
 
 describe("full test suite", () => {
   let provider: Provider
@@ -63,6 +69,9 @@ describe("full test suite", () => {
   const stx_token = `ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.stx-token`
 
   before(async () => {
+    ProviderRegistry.registerProvider(
+      providerWithInitialAllocations(balances)
+    )
     provider = await ProviderRegistry.createProvider()
 
     src20TraitClient = new Client("ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.src20-trait", "src20-trait", provider)
@@ -79,7 +88,7 @@ describe("full test suite", () => {
   })
 
   describe("Check contracts", () => {
-    it.only("should have a valid syntax", async () => {
+    it("should have a valid syntax", async () => {
       await src20TraitClient.checkContract()
       await src20TraitClient.deployContract()
 
