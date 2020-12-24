@@ -13,8 +13,11 @@
 (define-constant reward3 u3)
 
 (define-map balances
-  ((owner principal))
-  ((amount uint) (height uint))
+  { owner: principal }
+  {
+    amount: uint,
+    height: uint,
+  }
 )
 
 (define-data-var supply uint u0)
@@ -55,7 +58,7 @@
             )
           )
         )
-        (ok true)
+        ;; (ok true)
       )
       (err no-stake-err)
     )

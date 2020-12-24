@@ -13,8 +13,8 @@
     "test": "mocha 'test/unit/*.ts'"
   },
   "dependencies": {
-    "@blockstack/clarity-cli": "^0.2.0",
-    "@blockstack/stacks-transactions": "^0.7.0",
+    "@blockstack/clarity-cli": "^0.3.5",
+    "@stacks/transactions": "^1.0.0-beta.20",
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {

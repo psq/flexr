@@ -75,16 +75,19 @@ describe("full test suite", () => {
     flexrStxTokenClient = new FlexrStxTokenClient("flexr-stx", "ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA", provider)
     stxClient = new StxClient("ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA", provider)
     plaidClient = new PlaidClient("ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA", provider)
-    plaidStxTokenClient = new PlaidStxTokenClient("[plaid]-stx", "ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA", provider)
+    plaidStxTokenClient = new PlaidStxTokenClient("plaid-stx", "ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA", provider)
   })
 
   describe("Check contracts", () => {
-    it("should have a valid syntax", async () => {
+    it.only("should have a valid syntax", async () => {
       await src20TraitClient.checkContract()
       await src20TraitClient.deployContract()
 
       await swaprTraitClient.checkContract()
       await swaprTraitClient.deployContract()
+
+      await plaidClient.checkContract()
+      await plaidClient.deployContract()
 
       await swaprClient.checkContract()
       await swaprClient.deployContract()
@@ -103,9 +106,6 @@ describe("full test suite", () => {
 
       await geyserClient.checkContract()
       await geyserClient.deployContract()
-
-      await plaidClient.checkContract()
-      await plaidClient.deployContract()
 
       await plaidStxTokenClient.checkContract()
       await plaidStxTokenClient.deployContract()

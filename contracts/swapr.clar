@@ -44,25 +44,29 @@
 ;; (token-x, token-y, principal) => (shares)
 
 (define-map pairs-map
-  ((pair-id uint))
-  ((token-x principal) (token-y principal))
+  { pair-id: uint }
+  {
+    token-x: principal,
+    token-y: principal,
+  }
 )
 
 (define-map pairs-data-map
-  ((token-x principal) (token-y principal))
-  (
-    (shares-total uint)
-    ;; (balance-x uint)  ;; use balance-of instead
-    ;; (balance-y uint)
-    (fee-balance-x uint)
-    (fee-balance-y uint)
-    (fee-to-address (optional principal))
-    (swapr-token principal)
-    (name (string-ascii 32))
-  )
+  { 
+    token-x: principal,
+    token-y: principal,
+  }
+  {
+    shares-total: uint,
+    fee-balance-x: uint,
+    fee-balance-y: uint,
+    fee-to-address: (optional principal),
+    swapr-token: principal,
+    name: (string-ascii 32),
+  }
 )
 
-;; TODO(psq): replace use of balance-x/balance-y with a call to balance-of(swapr) on the token itself, no write to do actually!!!  The transfer is the write, that's cool :)
+;; ;; TODO(psq): replace use of balance-x/balance-y with a call to balance-of(swapr) on the token itself, no write to do actually!!!  The transfer is the write, that's cool :)
 
 
 ;; (define-map shares-map
@@ -79,7 +83,7 @@
 
 ;; (define-public (transfer (token-x-trait <src20-token>) (token-y-trait <src20-token>) (recipient principal) (amount uint) (token-trait <src20-token>))
 ;;   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)) (token (contract-of token-trait)))
-;;     (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
+;;     (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
 ;;       (if (eq token (get swapr-token pair))
 ;;         (contract-call? token-trait transfer recipient amount)
 ;;         (err wrong-token-err)
@@ -90,14 +94,15 @@
 
 (define-read-only (name (token-x-trait <src20-token>) (token-y-trait <src20-token>))
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
-    (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
+    (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
       (ok (get name pair))
     )
   )
 )
 
 (define-read-only (symbol (token-x-trait <src20-token>) (token-y-trait <src20-token>))
-  (contract-call? ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.plaid-token symbol)
+  ;; TODO(psq): this should be the symbol of the pair, not a single token
+  (contract-call? 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.plaid-token symbol)
   ;; (contract-call? token-y-trait symbol)
   ;; (ok (concat (unwrap-panic (as-max-len? (unwrap-panic (contract-call? token-x-trait symbol)) u16)) (concat "-" (unwrap-panic (as-max-len? (unwrap-panic (contract-call? token-y-trait symbol)) u15)))))
 )
@@ -116,7 +121,7 @@
 
 (define-read-only (total-supply (token-x-trait <src20-token>) (token-y-trait <src20-token>))
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
-    (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
+    (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
       (ok (get shares-total pair))
     )
   )
@@ -139,7 +144,7 @@
 
 ;; get the total number of shares in the pool
 (define-read-only (get-shares (token-x principal) (token-y principal))
-  (ok (get shares-total (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
+  (ok (get shares-total (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
 )
 
 ;; TODO(psq): only works if a token is in only one pair, to make this work, needs a new instance of the contract per pair at a different address
@@ -152,7 +157,7 @@
 
 ;; (define-public (get-balances-of (token-x-trait <src20-token>) (token-y-trait <src20-token>) (owner principal))
 ;;   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
-;;     (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
+;;     (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
 ;;       (let ((x (balance token-x-trait)) (y (balance token-y-trait)) (shares-total (get shares-total pair)) (shares (shares-of token-x token-y owner)))
 ;;         (if (> shares-total u0)
 ;;           (ok (list (/ (* x shares) shares-total) (/ (* y shares) shares-total)))  ;; less precision loss doing * first
@@ -197,7 +202,7 @@
 ;; get overall balances for the pair
 (define-public (get-balances (token-x-trait <src20-token>) (token-y-trait <src20-token>))
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
-    (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
+    (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
       (ok (list (balance token-x-trait) (balance token-y-trait)))
     )
   )
@@ -208,7 +213,7 @@
 ;; (define-constant y-token 'SP1QR3RAGH3GEME9WV7XB0TZCX6D5MNDQP97D35EH.my-token)
 (define-public (add-to-position (token-x-trait <src20-token>) (token-y-trait <src20-token>) (token-swapr-trait <swapr-token>) (x uint) (y uint))
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
-    (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)) (contract-address (as-contract tx-sender)) (recipient-address tx-sender))
+    (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)) (contract-address (as-contract tx-sender)) (recipient-address tx-sender))
       ;; TODO(psq) check if x or y is 0, to calculate proper exchange rate unless shares-total is 0, which would be an error
       (if
         (and
@@ -228,15 +233,15 @@
                     shares
                   )
                 )))
-            (map-set pairs-data-map ((token-x token-x) (token-y token-y))
-              (
-                (shares-total (+ new-shares (get shares-total pair)))
-                (fee-balance-x (get fee-balance-x pair))
-                (fee-balance-y (get fee-balance-y pair))
-                (fee-to-address (get fee-to-address pair))
-                (name (get name pair))
-                (swapr-token (get swapr-token pair))
-              )
+            (map-set pairs-data-map { token-x: token-x, token-y: token-y }
+              {
+                shares-total: (+ new-shares (get shares-total pair)),
+                fee-balance-x: (get fee-balance-x pair),
+                fee-balance-y: (get fee-balance-y pair),
+                fee-to-address: (get fee-to-address pair),
+                name: (get name pair),
+                swapr-token: (get swapr-token pair),
+              }
             )
             (print "token-swapr-trait.mint params")
             (print x)
@@ -255,11 +260,11 @@
 )
 
 (define-read-only (get-pair-details (token-x principal) (token-y principal))
-  (unwrap-panic (map-get? pairs-data-map ((token-x token-x) (token-y token-y))))
+  (unwrap-panic (map-get? pairs-data-map { token-x: token-x, token-y: token-y }))
 )
 
 (define-read-only (get-pair-contracts (pair-id uint))
-  (unwrap-panic (map-get? pairs-map ((pair-id pair-id))))
+  (unwrap-panic (map-get? pairs-map { pair-id: pair-id }))
 )
 
 (define-read-only (get-pair-count)
@@ -275,19 +280,19 @@
   ;; check neither x,y or y,x exists`
   (let ((name-x (unwrap-panic (contract-call? token-x-trait name))) (name-y (unwrap-panic (contract-call? token-y-trait name))))
     (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)) (pair-id (+ (var-get pair-count) u1)))
-      (if (and (is-none (map-get? pairs-data-map ((token-x token-x) (token-y token-y)))) (is-none (map-get? pairs-data-map ((token-x token-y) (token-y token-x)))))
+      (if (and (is-none (map-get? pairs-data-map { token-x: token-x, token-y: token-y })) (is-none (map-get? pairs-data-map { token-x: token-y, token-y: token-x })))
         (begin
-          (map-set pairs-data-map ((token-x token-x) (token-y token-y))
-            (
-              (shares-total u0)
-              (fee-balance-x u0)
-              (fee-balance-y u0)
-              (fee-to-address none)
-              (swapr-token (contract-of token-swapr-trait))
-              (name pair-name)
-            )
+          (map-set pairs-data-map { token-x: token-x, token-y: token-y }
+            {
+              shares-total: u0,
+              fee-balance-x: u0,
+              fee-balance-y: u0,
+              fee-to-address: none,
+              swapr-token: (contract-of token-swapr-trait),
+              name: pair-name,
+            }
           )
-          (map-set pairs-map ((pair-id pair-id)) ((token-x token-x) (token-y token-y)))
+          (map-set pairs-map { pair-id: pair-id } { token-x: token-x, token-y: token-y })
           ;; (var-set pairs-list (unwrap! (as-max-len? (append (var-get pairs-list) pair-id) u2000) too-many-pairs-err))
           (var-set pair-count pair-id)
           (add-to-position token-x-trait token-y-trait token-swapr-trait x y)
@@ -304,7 +309,7 @@
 ;; ;; to close, use u100
 (define-public (reduce-position (token-x-trait <src20-token>) (token-y-trait <src20-token>) (token-swapr-trait <swapr-token>) (percent uint))
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
-    (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
+    (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
       (let ((shares (unwrap-panic (contract-call? token-swapr-trait balance-of tx-sender))) (shares-total (get shares-total pair)) (contract-address (as-contract tx-sender)) (sender tx-sender))
         (let ((withdrawal (/ (* shares percent) u100)))
           (let ((withdrawal-x (/ (* withdrawal (balance token-x-trait)) shares-total)) (withdrawal-y (/ (* withdrawal (balance token-y-trait)) shares-total)))
@@ -316,15 +321,15 @@
               )
               (begin
                 ;; (unwrap-panic (decrease-shares token-x token-y tx-sender withdrawal)) ;; should never fail, you know...
-                (map-set pairs-data-map ((token-x token-x) (token-y token-y))
-                  (
-                    (shares-total (- shares-total withdrawal))
-                    (fee-balance-x (get fee-balance-x pair))
-                    (fee-balance-y (get fee-balance-y pair))
-                    (fee-to-address (get fee-to-address pair))
-                    (name (get name pair))
-                    (swapr-token (get swapr-token pair))
-                  )
+                (map-set pairs-data-map { token-x: token-x, token-y: token-y }
+                  {
+                    shares-total: (- shares-total withdrawal),
+                    fee-balance-x: (get fee-balance-x pair),
+                    fee-balance-y: (get fee-balance-y pair),
+                    fee-to-address: (get fee-to-address pair),
+                    name: (get name pair),
+                    swapr-token: (get swapr-token pair),
+                  }
                 )
                 (unwrap-panic (contract-call? token-swapr-trait transfer contract-address withdrawal))  ;; transfer back to swapr, wish there was a burn instead...
                 (ok (list withdrawal-x withdrawal-y))
@@ -345,7 +350,7 @@
   ;; transfer
   ;; update balances
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
-    (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
+    (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
       (let
         (
           (contract-address (as-contract tx-sender))
@@ -359,20 +364,20 @@
             (is-ok (as-contract (contract-call? token-y-trait transfer sender dy)))
           )
           (begin
-            (map-set pairs-data-map ((token-x token-x) (token-y token-y))
-              (
-                (shares-total (get shares-total pair))
-                (fee-balance-x
+            (map-set pairs-data-map { token-x: token-x, token-y: token-y }
+              {
+                shares-total: (get shares-total pair),
+                fee-balance-x:
                   (if (is-some (get fee-to-address pair))  ;; only collect fee when fee-to-address is set
                     (+ fee (get fee-balance-x pair))
                     (get fee-balance-x pair)
                   )
-                )
-                (fee-balance-y (get fee-balance-y pair))
-                (fee-to-address (get fee-to-address pair))
-                (name (get name pair))
-                (swapr-token (get swapr-token pair))
-              )
+                ,
+                fee-balance-y: (get fee-balance-y pair),
+                fee-to-address: (get fee-to-address pair),
+                name: (get name pair),
+                swapr-token: (get swapr-token pair),
+              }
             )
             (ok (list dx dy))
           )
@@ -390,7 +395,7 @@
   ;; transfer
   ;; update balances
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
-    (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
+    (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
       (let
         (
           (contract-address (as-contract tx-sender))
@@ -404,9 +409,9 @@
             (is-ok (as-contract (contract-call? token-y-trait transfer sender dy)))
           )
           (begin
-            (map-set pairs-data-map ((token-x token-x) (token-y token-y))
-              (
-                (shares-total (get shares-total pair))
+            (map-set pairs-data-map { token-x: token-x, token-y: token-y }
+              {
+                shares-total: (get shares-total pair),
                 ;; (balance-x
                 ;;   (if (is-some (get fee-to-address pair))  ;; only collect fee when fee-to-address is set
                 ;;     (- (+ (balance token-x-trait) dx) fee)  ;; add dx - fee
@@ -414,17 +419,17 @@
                 ;;   )
                 ;; )
                 ;; (balance-y (- (balance token-y-trait) dy))
-                (fee-balance-x
+                fee-balance-x:
                   (if (is-some (get fee-to-address pair))  ;; only collect fee when fee-to-address is set
                     (+ fee (get fee-balance-x pair))
                     (get fee-balance-x pair)
                   )
-                )
-                (fee-balance-y (get fee-balance-y pair))
-                (fee-to-address (get fee-to-address pair))
-                (name (get name pair))
-                (swapr-token (get swapr-token pair))
-              )
+                ,
+                fee-balance-y: (get fee-balance-y pair),
+                fee-to-address: (get fee-to-address pair),
+                name: (get name pair),
+                swapr-token: (get swapr-token pair),
+              }
             )
             (ok (list dx dy))
           )
@@ -442,7 +447,7 @@
   ;; transfer
   ;; update balances
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
-    (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
+    (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
       (let
         (
           (contract-address (as-contract tx-sender))
@@ -456,9 +461,9 @@
           (is-ok (contract-call? token-y-trait transfer contract-address dy))
           )
           (begin
-            (map-set pairs-data-map ((token-x token-x) (token-y token-y))
-              (
-                (shares-total (get shares-total pair))
+            (map-set pairs-data-map { token-x: token-x, token-y: token-y }
+              {
+                shares-total: (get shares-total pair),
                 ;; (balance-x (- (balance token-x-trait) dx)) ;; remove dx
                 ;; (balance-y
                 ;;   (if (is-some (get fee-to-address pair))  ;; only collect fee when fee-to-address is set
@@ -466,17 +471,17 @@
                 ;;     (+ (balance token-y-trait) dy)  ;; add dy
                 ;;   )
                 ;; )
-                (fee-balance-x (get fee-balance-x pair))
-                (fee-balance-y
+                fee-balance-x: (get fee-balance-x pair),
+                fee-balance-y:
                   (if (is-some (get fee-to-address pair))  ;; only collect fee when fee-to-address is set
                     (+ fee (get fee-balance-y pair))
                     (get fee-balance-y pair)
                   )
-                )
-                (fee-to-address (get fee-to-address pair))
-                (name (get name pair))
-                (swapr-token (get swapr-token pair))
-              )
+                ,
+                fee-to-address: (get fee-to-address pair),
+                name: (get name pair),
+                swapr-token: (get swapr-token pair),
+              }
             )
             (ok (list dx dy))
           )
@@ -494,7 +499,7 @@
   ;; transfer
   ;; update balances
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
-    (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
+    (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
       (let
         (
           (contract-address (as-contract tx-sender))
@@ -508,9 +513,9 @@
             (is-ok (contract-call? token-y-trait transfer contract-address dy))
           )
           (begin
-            (map-set pairs-data-map ((token-x token-x) (token-y token-y))
-              (
-                (shares-total (get shares-total pair))
+            (map-set pairs-data-map { token-x: token-x, token-y: token-y }
+              {
+                shares-total: (get shares-total pair),
                 ;; (balance-x (- (balance token-x-trait) dx)) ;; remove dx
                 ;; (balance-y
                 ;;   (if (is-some (get fee-to-address pair))  ;; only collect fee when fee-to-address is set
@@ -518,17 +523,17 @@
                 ;;     (+ (balance token-y-trait) dy)  ;; add dy
                 ;;   )
                 ;; )
-                (fee-balance-x (get fee-balance-x pair))
-                (fee-balance-y
+                fee-balance-x: (get fee-balance-x pair),
+                fee-balance-y:
                   (if (is-some (get fee-to-address pair))  ;; only collect fee when fee-to-address is set
                     (+ fee (get fee-balance-y pair))
                     (get fee-balance-y pair)
                   )
-                )
-                (fee-to-address (get fee-to-address pair))
-                (name (get name pair))
-                (swapr-token (get swapr-token pair))
-              )
+                ,
+                fee-to-address: (get fee-to-address pair),
+                name: (get name pair),
+                swapr-token: (get swapr-token pair),
+              }
             )
             (ok (list dx dy))
           )
@@ -541,20 +546,20 @@
 
 ;; ;; activate the contract fee for swaps by setting the collection address, restricted to contract owner
 (define-public (set-fee-to-address (token-x principal) (token-y principal) (address principal))
-  (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
+  (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
     (if (is-eq tx-sender contract-owner)
       (begin
-        (map-set pairs-data-map ((token-x token-x) (token-y token-y))
-          (
-            (shares-total (get shares-total pair))
+        (map-set pairs-data-map { token-x: token-x, token-y: token-y }
+          {
+            shares-total: (get shares-total pair),
             ;; (balance-x (balance token-x-trait))
             ;; (balance-y (balance token-y-trait))
-            (fee-balance-x (get fee-balance-y pair))
-            (fee-balance-y (get fee-balance-y pair))
-            (fee-to-address (some address))
-            (name (get name pair))
-            (swapr-token (get swapr-token pair))
-          )
+            fee-balance-x: (get fee-balance-y pair),
+            fee-balance-y: (get fee-balance-y pair),
+            fee-to-address: (some address),
+            name: (get name pair),
+            swapr-token: (get swapr-token pair),
+          }
         )
         (ok true)
       )
@@ -566,20 +571,20 @@
 ;; ;; clear the contract fee addres
 ;; ;; TODO(psq): if there are any collected fees, prevent this from happening, as the fees can no longer be collect with `collect-fees`
 (define-public (reset-fee-to-address (token-x principal) (token-y principal))
-  (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
+  (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
     (if (is-eq tx-sender contract-owner)
       (begin
-        (map-set pairs-data-map ((token-x token-x) (token-y token-y))
-          (
-            (shares-total (get shares-total pair))
+        (map-set pairs-data-map { token-x: token-x, token-y: token-y }
+          {
+            shares-total: (get shares-total pair),
             ;; (balance-x (balance token-x-trait))
             ;; (balance-y (balance token-y-trait))
-            (fee-balance-x (get fee-balance-y pair))
-            (fee-balance-y (get fee-balance-y pair))
-            (fee-to-address none)
-            (name (get name pair))
-            (swapr-token (get swapr-token pair))
-          )
+            fee-balance-x: (get fee-balance-y pair),
+            fee-balance-y: (get fee-balance-y pair),
+            fee-to-address: none,
+            name: (get name pair),
+            swapr-token: (get swapr-token pair),
+          }
         )
         (ok true)
       )
@@ -590,14 +595,14 @@
 
 ;; ;; get the current address used to collect a fee
 (define-read-only (get-fee-to-address (token-x principal) (token-y principal))
-  (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
+  (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
     (ok (get fee-to-address pair))
   )
 )
 
 ;; ;; get the amount of fees charged on x-token and y-token exchanges that have not been collected yet
 (define-read-only (get-fees (token-x principal) (token-y principal))
-  (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
+  (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
     (ok (list (get fee-balance-x pair) (get fee-balance-y pair)))
   )
 )
@@ -605,7 +610,7 @@
 ;; ;; send the collected fees the fee-to-address
 (define-public (collect-fees (token-x-trait <src20-token>) (token-y-trait <src20-token>))
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
-    (let ((pair (unwrap! (map-get? pairs-data-map ((token-x token-x) (token-y token-y))) invalid-pair-err)))
+    (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
       (let ((address (unwrap! (get fee-to-address pair) no-fee-to-address-err)) (fee-x (get fee-balance-x pair)) (fee-y (get fee-balance-y pair)))
         (if
           (and
@@ -613,17 +618,17 @@
             (or (is-eq fee-y u0) (is-ok (as-contract (contract-call? token-y-trait transfer address fee-y))))
           )
           (begin
-            (map-set pairs-data-map ((token-x token-x) (token-y token-y))
-              (
-                (shares-total (get shares-total pair))
+            (map-set pairs-data-map { token-x: token-x, token-y: token-y }
+              {
+                shares-total: (get shares-total pair),
                 ;; (balance-x (balance token-x-trait))
                 ;; (balance-y (balance token-y-trait))
-                (fee-balance-x u0)
-                (fee-balance-y u0)
-                (fee-to-address (get fee-to-address pair))
-                (name (get name pair))
-                (swapr-token (get swapr-token pair))
-              )
+                fee-balance-x: u0,
+                fee-balance-y: u0,
+                fee-to-address: (get fee-to-address pair),
+                name: (get name pair),
+                swapr-token: (get swapr-token pair),
+              }
             )
             (ok (list fee-x fee-y))
           )

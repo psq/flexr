@@ -15,8 +15,8 @@
 (define-data-var last-rebase-height uint u0)
 
 (define-map balances
-  ((owner principal))
-  ((base-amount uint) (total-supply-adjuster uint))
+  { owner: principal }
+  { base-amount: uint, total-supply-adjuster: uint }
 )
 
 (define-private (balance-set (recipient principal) (amount uint))
@@ -76,7 +76,7 @@
 
 ;; the token symbol
 (define-read-only (symbol)
-  (ok "FLX")
+  (ok "FLXR")
 )
 
 ;; the number of decimals used
