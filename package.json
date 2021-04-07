@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@blockstack/clarity-cli": "^0.3.5",
+    "@stacks/network": "^1.2.2",
     "@stacks/transactions": "^1.0.0-beta.20",
     "node-fetch": "^2.6.1"
   },

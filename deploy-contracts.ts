@@ -2,12 +2,13 @@ const BigNum = require("bn.js")
 import * as fs from "fs"
 const fetch = require("node-fetch")
 import {
-  StacksTestnet,
   broadcastTransaction,
   makeContractDeploy,
   TxBroadcastResultOk,
   TxBroadcastResultRejected,
-} from "@blockstack/stacks-transactions"
+} from "@stacks/transactions"
+import { StacksTestnet, StacksMainnet } from '@stacks/network'
+
 
 const keys = JSON.parse(
   fs.readFileSync("./keychain.json").toString()
@@ -18,10 +19,10 @@ const mode = process.argv[2] || 'mocknet'
 
 console.log("deploying swapr with", keys.swapr.stacksAddress, "on", mode)
 
-const STACKS_API_URL = mode === 'mocknet' ? 'http://localhost:3999' : 'https://stacks-node-api.blockstack.org'
-const network = new StacksTestnet()
+const STACKS_API_URL = mode === 'mocknet' ? 'http://localhost:3999' : mode === 'nanorails' ? 'https://stacks-api.nanorails.com' : 'https://stacks-node-api.mainnet.stacks.co'
+const network = mode === 'mainnet' ? new StacksMainnet() : new StacksTestnet()
 network.coreApiUrl = STACKS_API_URL
-
+console.log("using", STACKS_API_URL)
 
 async function deployContract(contract_name: string, fee: number) {
   console.log(`deploying ${contract_name}`)
@@ -59,43 +60,40 @@ function timeout(ms: number) {
 }
 
 async function processing(tx: String, count: number = 0): Promise<boolean> {
-  console.log("processing", tx)
+  console.log("processing", tx, count)
   var result = await fetch(
     `${STACKS_API_URL}/extended/v1/tx/${tx}`
   )
   var value = await result.json()
-  console.log(count)
   if (value.tx_status === "success") {
     console.log(`transaction ${tx} processed`)
     // console.log(value)
     return true
   }
-  if (value.tx_status === "pending") {
-    console.log("pending" /*, value*/)
-  }
-  if (count > 2) {
+  // if (value.tx_status === "pending") {
+  //   console.log("pending" /*, value*/)
+  // }
+  if (count > 10) {
     console.log("failed after 2 attempts", value)
     return false
   }
 
-  await timeout(5000)
+  await timeout(15000)
   return processing(tx, count + 1)
 }
 
 (async () => {
   await deployContract('src20-trait', 3000)
+  await deployContract('plaid-token', 3000)
   await deployContract('swapr-trait', 3000)
   await deployContract('swapr', 3000)
   await deployContract('stx-token', 3000)
   await deployContract('oracle', 3000)
   await deployContract('flexr-token', 3000)
   await deployContract('flexr-stx-token', 3000)
-  await deployContract('plaid-token', 3000)
   await deployContract('plaid-stx-token', 3000)
   await deployContract('geyser', 3000)
 
-  // deploy an other token (ft based rather than stx based): plaid
-  await deployContract('plaid-token', 3000)
 
   // create flexr-stx pair
   // create plaid-stx pair

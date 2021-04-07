@@ -1,6 +1,6 @@
 ;; wrap the native STX token into an SRC20 compatible token to be usable along other tokens
 ;; (use-trait src20-token .src20-trait.src20-trait)
-(impl-trait 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.sip-010.ft-trait)
+(impl-trait 'ST000000000000000000002AMW42H.sip-010.ft-trait)
 
 (define-fungible-token plaid)
 
@@ -31,7 +31,7 @@
 )
 
 (define-read-only (get-token-uri)
-  (ok "https://swapr.finance/tokens/plaid.json")
+  (ok (some u"https://swapr.finance/tokens/plaid.json"))
 )
 ;; {
 ;;   "name":"Plaid",

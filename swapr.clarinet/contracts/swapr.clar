@@ -1,5 +1,5 @@
-(use-trait src20-token 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.src20-trait.src20-trait)
-(use-trait swapr-token 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.swapr-trait.swapr-trait)
+(use-trait src20-token 'ST000000000000000000002AMW42H.sip-010.ft-trait)
+(use-trait swapr-token 'ST000000000000000000002AMW42H.swapr-trait.swapr-trait)
 
 (define-constant contract-owner 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA)
 (define-constant no-liquidity-err (err u61))
@@ -92,7 +92,7 @@
 ;;   )
 ;; )
 
-(define-read-only (name (token-x-trait <src20-token>) (token-y-trait <src20-token>))
+(define-read-only (get-name (token-x-trait <src20-token>) (token-y-trait <src20-token>))
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
     (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
       (ok (get name pair))
@@ -100,11 +100,11 @@
   )
 )
 
-(define-read-only (symbol (token-x-trait <src20-token>) (token-y-trait <src20-token>))
+(define-public (get-symbol (token-x-trait <src20-token>) (token-y-trait <src20-token>))
   ;; TODO(psq): this should be the symbol of the pair, not a single token
   ;; TODO(psq): obvious not the rigth thing to do here
-  (contract-call? 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.plaid-token symbol)
-  ;; (contract-call? token-y-trait symbol)
+  ;; (contract-call? 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.plaid-token symbol)
+  (contract-call? token-y-trait get-symbol)
   ;; (ok (concat (unwrap-panic (as-max-len? (unwrap-panic (contract-call? token-x-trait symbol)) u15)) (concat "-" (unwrap-panic (as-max-len? (unwrap-panic (contract-call? token-y-trait symbol)) u15)))))
 )
 
@@ -120,7 +120,7 @@
 ;;   )
 ;; )
 
-(define-read-only (total-supply (token-x-trait <src20-token>) (token-y-trait <src20-token>))
+(define-read-only (get-total-supply (token-x-trait <src20-token>) (token-y-trait <src20-token>))
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
     (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
       (ok (get shares-total pair))
@@ -150,9 +150,9 @@
 
 ;; TODO(psq): only works if a token is in only one pair, to make this work, needs a new instance of the contract per pair at a different address
 ;; which would remove the need for a separate token, as swapr can be its own token
-(define-private (balance (token-trait <src20-token>))
+(define-private (get-balance (token-trait <src20-token>))
   (begin
-    (unwrap-panic (contract-call? token-trait balance-of (as-contract tx-sender)))
+    (unwrap-panic (contract-call? token-trait get-balance-of (as-contract tx-sender)))
   )
 )
 
@@ -204,7 +204,7 @@
 (define-public (get-balances (token-x-trait <src20-token>) (token-y-trait <src20-token>))
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
     (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
-      (ok (list (balance token-x-trait) (balance token-y-trait)))
+      (ok (list (get-balance token-x-trait) (get-balance token-y-trait)))
     )
   )
 )
@@ -219,8 +219,8 @@
       (if
         (and
           ;; TODO(psq): check that the amount transfered in matches the amount requested
-          (is-ok (contract-call? token-x-trait transfer contract-address x))
-          (is-ok (contract-call? token-y-trait transfer contract-address y))
+          (is-ok (contract-call? token-x-trait transfer x tx-sender contract-address))
+          (is-ok (contract-call? token-y-trait transfer y tx-sender contract-address))
         )
         (begin
           (print "calculate new-shares")
@@ -229,7 +229,7 @@
                     ;; (increase-shares token-x token-y tx-sender shares)
                     shares
                   )
-                  (let ((shares (/ (* (print x) (print (get shares-total pair))) (print (balance token-x-trait)))))
+                  (let ((shares (/ (* (print x) (print (get shares-total pair))) (print (get-balance token-x-trait)))))
                     ;; (increase-shares token-x token-y tx-sender shares)
                     shares
                   )
@@ -279,7 +279,7 @@
 (define-public (create-pair (token-x-trait <src20-token>) (token-y-trait <src20-token>) (token-swapr-trait <swapr-token>) (pair-name (string-ascii 32)) (x uint) (y uint))
   ;; TOOD(psq): add creation checks, then create map before proceeding to add-to-position
   ;; check neither x,y or y,x exists`
-  (let ((name-x (unwrap-panic (contract-call? token-x-trait name))) (name-y (unwrap-panic (contract-call? token-y-trait name))))
+  (let ((name-x (unwrap-panic (contract-call? token-x-trait get-name))) (name-y (unwrap-panic (contract-call? token-y-trait get-name))))
     (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)) (pair-id (+ (var-get pair-count) u1)))
       (if (and (is-none (map-get? pairs-data-map { token-x: token-x, token-y: token-y })) (is-none (map-get? pairs-data-map { token-x: token-y, token-y: token-x })))
         (begin
@@ -311,14 +311,14 @@
 (define-public (reduce-position (token-x-trait <src20-token>) (token-y-trait <src20-token>) (token-swapr-trait <swapr-token>) (percent uint))
   (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
     (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
-      (let ((shares (unwrap-panic (contract-call? token-swapr-trait balance-of tx-sender))) (shares-total (get shares-total pair)) (contract-address (as-contract tx-sender)) (sender tx-sender))
+      (let ((shares (unwrap-panic (contract-call? token-swapr-trait get-balance-of tx-sender))) (shares-total (get shares-total pair)) (contract-address (as-contract tx-sender)) (sender tx-sender))
         (let ((withdrawal (/ (* shares percent) u100)))
-          (let ((withdrawal-x (/ (* withdrawal (balance token-x-trait)) shares-total)) (withdrawal-y (/ (* withdrawal (balance token-y-trait)) shares-total)))
+          (let ((withdrawal-x (/ (* withdrawal (get-balance token-x-trait)) shares-total)) (withdrawal-y (/ (* withdrawal (get-balance token-y-trait)) shares-total)))
             (if
               (and
                 (<= percent u100)
-                (is-ok (as-contract (contract-call? token-x-trait transfer sender withdrawal-x)))
-                (is-ok (as-contract (contract-call? token-y-trait transfer sender withdrawal-y)))
+                (is-ok (as-contract (contract-call? token-x-trait transfer withdrawal-x contract-address sender)))
+                (is-ok (as-contract (contract-call? token-y-trait transfer withdrawal-y contract-address sender)))
               )
               (begin
                 ;; (unwrap-panic (decrease-shares token-x token-y tx-sender withdrawal)) ;; should never fail, you know...
@@ -332,7 +332,8 @@
                     swapr-token: (get swapr-token pair),
                   }
                 )
-                (unwrap-panic (contract-call? token-swapr-trait transfer contract-address withdrawal))  ;; transfer back to swapr, wish there was a burn instead...
+                ;; TODO(psq): use burn
+                (unwrap-panic (contract-call? token-swapr-trait transfer withdrawal tx-sender contract-address))  ;; transfer back to swapr, wish there was a burn instead...
                 (ok (list withdrawal-x withdrawal-y))
               )
               transfer-failed-err
@@ -356,13 +357,13 @@
         (
           (contract-address (as-contract tx-sender))
           (sender tx-sender)
-          (dy (/ (* u997 (balance token-y-trait) dx) (+ (* u1000 (balance token-x-trait)) (* u997 dx)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
+          (dy (/ (* u997 (get-balance token-y-trait) dx) (+ (* u1000 (get-balance token-x-trait)) (* u997 dx)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
           (fee (/ (* u5 dx) u10000)) ;; 5 bp
         )
         (if (and
           ;; TODO(psq): check that the amount transfered in matches the amount requested
-            (is-ok (contract-call? token-x-trait transfer contract-address dx))
-            (is-ok (as-contract (contract-call? token-y-trait transfer sender dy)))
+            (is-ok (contract-call? token-x-trait transfer dx sender contract-address))
+            (is-ok (as-contract (contract-call? token-y-trait transfer dy contract-address sender)))
           )
           (begin
             (map-set pairs-data-map { token-x: token-x, token-y: token-y }
@@ -401,13 +402,13 @@
         (
           (contract-address (as-contract tx-sender))
           (sender tx-sender)
-          (dx (/ (* u1000 (balance token-x-trait) dy) (* u997 (- (balance token-y-trait) dy)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
-          (fee (/ (* (balance token-x-trait) dy) (* u1994 (- (balance token-y-trait) dy)))) ;; 5 bp
+          (dx (/ (* u1000 (get-balance token-x-trait) dy) (* u997 (- (get-balance token-y-trait) dy)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
+          (fee (/ (* (get-balance token-x-trait) dy) (* u1994 (- (get-balance token-y-trait) dy)))) ;; 5 bp
         )
         (if (and
           ;; TODO(psq): check that the amount transfered in matches the amount requested
-            (is-ok (contract-call? token-x-trait transfer contract-address dx))
-            (is-ok (as-contract (contract-call? token-y-trait transfer sender dy)))
+            (is-ok (contract-call? token-x-trait transfer dx sender contract-address))
+            (is-ok (as-contract (contract-call? token-y-trait transfer dy contract-address sender)))
           )
           (begin
             (map-set pairs-data-map { token-x: token-x, token-y: token-y }
@@ -453,13 +454,13 @@
         (
           (contract-address (as-contract tx-sender))
           (sender tx-sender)
-          (dx (/ (* u997 (balance token-x-trait) dy) (+ (* u1000 (balance token-y-trait)) (* u997 dy)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
+          (dx (/ (* u997 (get-balance token-x-trait) dy) (+ (* u1000 (get-balance token-y-trait)) (* u997 dy)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
           (fee (/ (* u5 dy) u10000)) ;; 5 bp
         )
         (if (and
           ;; TODO(psq): check that the amount transfered in matches the amount requested
-          (is-ok (as-contract (contract-call? token-x-trait transfer sender dx)))
-          (is-ok (contract-call? token-y-trait transfer contract-address dy))
+          (is-ok (as-contract (contract-call? token-x-trait transfer dx contract-address sender)))
+          (is-ok (contract-call? token-y-trait transfer dy sender contract-address))
           )
           (begin
             (map-set pairs-data-map { token-x: token-x, token-y: token-y }
@@ -505,13 +506,13 @@
         (
           (contract-address (as-contract tx-sender))
           (sender tx-sender)
-          (dy (/ (* u1000 (balance token-y-trait) dx) (* u997 (- (balance token-x-trait) dx)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
-          (fee (/ (* (balance token-y-trait) dx) (* u1994 (- (balance token-x-trait) dx)))) ;; 5 bp
+          (dy (/ (* u1000 (get-balance token-y-trait) dx) (* u997 (- (get-balance token-x-trait) dx)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
+          (fee (/ (* (get-balance token-y-trait) dx) (* u1994 (- (get-balance token-x-trait) dx)))) ;; 5 bp
         )
         (if (and
           ;; TODO(psq): check that the amount transfered in matches the amount requested
-            (is-ok (as-contract (contract-call? token-x-trait transfer sender dx)))
-            (is-ok (contract-call? token-y-trait transfer contract-address dy))
+            (is-ok (as-contract (contract-call? token-x-trait transfer dx contract-address sender)))
+            (is-ok (contract-call? token-y-trait transfer dy sender contract-address))
           )
           (begin
             (map-set pairs-data-map { token-x: token-x, token-y: token-y }
@@ -610,13 +611,13 @@
 
 ;; ;; send the collected fees the fee-to-address
 (define-public (collect-fees (token-x-trait <src20-token>) (token-y-trait <src20-token>))
-  (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
+  (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)) (contract-address (as-contract tx-sender)))
     (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
       (let ((address (unwrap! (get fee-to-address pair) no-fee-to-address-err)) (fee-x (get fee-balance-x pair)) (fee-y (get fee-balance-y pair)))
         (if
           (and
-            (or (is-eq fee-x u0) (is-ok (as-contract (contract-call? token-x-trait transfer address fee-x))))
-            (or (is-eq fee-y u0) (is-ok (as-contract (contract-call? token-y-trait transfer address fee-y))))
+            (or (is-eq fee-x u0) (is-ok (as-contract (contract-call? token-x-trait transfer fee-x contract-address address))))
+            (or (is-eq fee-y u0) (is-ok (as-contract (contract-call? token-y-trait transfer fee-y contract-address address))))
           )
           (begin
             (map-set pairs-data-map { token-x: token-x, token-y: token-y }

@@ -1,0 +1,7 @@
+#V2
+::help
+::get_contracts
+::get_block_height
+::advance_chain_tip
+::advance_chain_tip 1
+::get_block_height
