@@ -35,4 +35,8 @@ balance = 1_000_000
 
 [accounts.wallet_9]
 mnemonic = "market ocean tortoise venue vivid coach machine category conduct enable insect jump fog file test core book chaos crucial burst version curious prosper fever"
-balance = 1_000_000
+balance = 1_000_000_000_000
+
+[accounts.wallet_10]
+mnemonic = "firm sword marriage reveal please kitten salon waste enjoy desert survey bench wonder hollow endless work senior rough boring mind toast sea obscure release"
+balance = 1_000_000_000_000
