@@ -12,6 +12,7 @@
 (define-constant too-many-pairs-err (err u68))
 (define-constant pair-already-exists-err (err u69))
 (define-constant wrong-token-err (err u70))
+(define-constant too-much-slippage-err (err u71))
 
 ;; for future use, or debug
 (define-constant e10-err (err u20))
@@ -345,8 +346,9 @@
   )
 )
 
-;; ;; exchange known dx of x-token for whatever dy of y-token based on current liquidity, returns (dx dy)
-(define-public (swap-exact-x-for-y (token-x-trait <src20-token>) (token-y-trait <src20-token>) (dx uint))
+;; exchange known dx of x-token for whatever dy of y-token based on current liquidity, returns (dx dy)
+;; the swap will not happen if can't get at least min-dy back
+(define-public (swap-exact-x-for-y (token-x-trait <src20-token>) (token-y-trait <src20-token>) (dx uint) (min-dy uint))
   ;; calculate dy
   ;; calculate fee on dx
   ;; transfer
@@ -390,60 +392,9 @@
   )
 )
 
-;; ;; exchange whatever dx of x-token for known dy of y-token based on liquidity, returns (dx dy)
-(define-public (swap-x-for-exact-y (token-x-trait <src20-token>) (token-y-trait <src20-token>) (dy uint))
-  ;; calculate dx
-  ;; calculate fee on dx
-  ;; transfer
-  ;; update balances
-  (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
-    (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
-      (let
-        (
-          (contract-address (as-contract tx-sender))
-          (sender tx-sender)
-          (dx (/ (* u1000 (get-balance token-x-trait) dy) (* u997 (- (get-balance token-y-trait) dy)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
-          (fee (/ (* (get-balance token-x-trait) dy) (* u1994 (- (get-balance token-y-trait) dy)))) ;; 5 bp
-        )
-        (if (and
-          ;; TODO(psq): check that the amount transfered in matches the amount requested
-            (is-ok (contract-call? token-x-trait transfer dx sender contract-address))
-            (is-ok (as-contract (contract-call? token-y-trait transfer dy contract-address sender)))
-          )
-          (begin
-            (map-set pairs-data-map { token-x: token-x, token-y: token-y }
-              {
-                shares-total: (get shares-total pair),
-                ;; (balance-x
-                ;;   (if (is-some (get fee-to-address pair))  ;; only collect fee when fee-to-address is set
-                ;;     (- (+ (balance token-x-trait) dx) fee)  ;; add dx - fee
-                ;;     (+ (balance token-x-trait) dx)  ;; add dx
-                ;;   )
-                ;; )
-                ;; (balance-y (- (balance token-y-trait) dy))
-                fee-balance-x:
-                  (if (is-some (get fee-to-address pair))  ;; only collect fee when fee-to-address is set
-                    (+ fee (get fee-balance-x pair))
-                    (get fee-balance-x pair)
-                  )
-                ,
-                fee-balance-y: (get fee-balance-y pair),
-                fee-to-address: (get fee-to-address pair),
-                name: (get name pair),
-                swapr-token: (get swapr-token pair),
-              }
-            )
-            (ok (list dx dy))
-          )
-          transfer-failed-err
-        )
-      )
-    )
-  )
-)
-
-;; ;; exchange known dy for whatever dx based on liquidity, returns (dx dy)
-(define-public (swap-exact-y-for-x (token-x-trait <src20-token>) (token-y-trait <src20-token>) (dy uint))
+;; exchange known dy for whatever dx based on liquidity, returns (dx dy)
+;; the swap will not happen if can't get at least min-dx back
+(define-public (swap-exact-y-for-x (token-x-trait <src20-token>) (token-y-trait <src20-token>) (dy uint) (min-dx uint))
   ;; calculate dx
   ;; calculate fee on dy
   ;; transfer
@@ -461,58 +412,6 @@
           ;; TODO(psq): check that the amount transfered in matches the amount requested
           (is-ok (as-contract (contract-call? token-x-trait transfer dx contract-address sender)))
           (is-ok (contract-call? token-y-trait transfer dy sender contract-address))
-          )
-          (begin
-            (map-set pairs-data-map { token-x: token-x, token-y: token-y }
-              {
-                shares-total: (get shares-total pair),
-                ;; (balance-x (- (balance token-x-trait) dx)) ;; remove dx
-                ;; (balance-y
-                ;;   (if (is-some (get fee-to-address pair))  ;; only collect fee when fee-to-address is set
-                ;;     (- (+ (balance token-y-trait) dy) fee)  ;; add dy - fee
-                ;;     (+ (balance token-y-trait) dy)  ;; add dy
-                ;;   )
-                ;; )
-                fee-balance-x: (get fee-balance-x pair),
-                fee-balance-y:
-                  (if (is-some (get fee-to-address pair))  ;; only collect fee when fee-to-address is set
-                    (+ fee (get fee-balance-y pair))
-                    (get fee-balance-y pair)
-                  )
-                ,
-                fee-to-address: (get fee-to-address pair),
-                name: (get name pair),
-                swapr-token: (get swapr-token pair),
-              }
-            )
-            (ok (list dx dy))
-          )
-          transfer-failed-err
-        )
-      )
-    )
-  )
-)
-
-;; ;; exchange whatever dy for known dx based on liquidity, returns (dx dy)
-(define-public (swap-y-for-exact-x (token-x-trait <src20-token>) (token-y-trait <src20-token>) (dx uint))
-  ;; calculate dy
-  ;; calculate fee on dy
-  ;; transfer
-  ;; update balances
-  (let ((token-x (contract-of token-x-trait)) (token-y (contract-of token-y-trait)))
-    (let ((pair (unwrap! (map-get? pairs-data-map { token-x: token-x, token-y: token-y }) invalid-pair-err)))
-      (let
-        (
-          (contract-address (as-contract tx-sender))
-          (sender tx-sender)
-          (dy (/ (* u1000 (get-balance token-y-trait) dx) (* u997 (- (get-balance token-x-trait) dx)))) ;; overall fee is 30 bp, either all for the pool, or 25 bp for pool and 5 bp for operator
-          (fee (/ (* (get-balance token-y-trait) dx) (* u1994 (- (get-balance token-x-trait) dx)))) ;; 5 bp
-        )
-        (if (and
-          ;; TODO(psq): check that the amount transfered in matches the amount requested
-            (is-ok (as-contract (contract-call? token-x-trait transfer dx contract-address sender)))
-            (is-ok (contract-call? token-y-trait transfer dy sender contract-address))
           )
           (begin
             (map-set pairs-data-map { token-x: token-x, token-y: token-y }

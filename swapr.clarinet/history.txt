@@ -1,7 +1,5 @@
 #V2
 ::help
-::get_contracts
-::get_block_height
-::advance_chain_tip
-::advance_chain_tip 1
-::get_block_height
+::set_tx_sender ST3AA33M8SS15A30ETXE134ZXD8TNEDHT8Q955G40
+::set_tx_sender 
+::get_accounts

@@ -1,39 +1,47 @@
-;; we implement the src20 + a mint function
-(impl-trait 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.swapr-trait.swapr-trait)
+;; ;; we implement the sip-010 + a mint function
+(impl-trait 'ST000000000000000000002AMW42H.swapr-trait.swapr-trait)
 
-;; we can use an ft-token here, so use it!
+;; ;; we can use an ft-token here, so use it!
 (define-fungible-token token)
 
 (define-constant no-acccess-err u40)
 
-;; implement all 4 functions required by src20
+;; implement all functions required by sip-010
 
-(define-public (transfer (recipient principal) (amount uint))
+(define-public (transfer (amount uint) (sender principal) (recipient principal))
   (begin
     (ft-transfer? token amount tx-sender recipient)
   )
 )
 
-(define-read-only (name)
-  (contract-call? 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.swapr name 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.plaid-token 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.stx-token)
+(define-read-only (get-name)
+  (ok "plaid-stx-swapr")
+;;   (contract-call? 'ST000000000000000000002AMW42H.swapr get-name 'ST000000000000000000002AMW42H.plaid-token 'ST000000000000000000002AMW42H.stx-token)
 )
 
-(define-read-only (symbol)
-  (contract-call? 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.swapr symbol 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.plaid-token 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.stx-token)
+(define-read-only (get-symbol)
+  (ok "plaid-stx-swapr")
+;;   (contract-call? 'ST000000000000000000002AMW42H.swapr get-symbol 'ST000000000000000000002AMW42H.plaid-token 'ST000000000000000000002AMW42H.stx-token)
 )
 
 ;; the number of decimals used
-(define-read-only (decimals)
-  (ok u6)  ;; arbitrary
+(define-read-only (get-decimals)
+  (ok u6)  ;; arbitrary, or ok?
 )
 
-(define-read-only (balance-of (owner principal))
+(define-read-only (get-balance-of (owner principal))
   (ok (ft-get-balance token owner))
 )
 
-(define-read-only (total-supply)
-  (contract-call? 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.swapr total-supply 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.plaid-token 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.stx-token)
+(define-read-only (get-total-supply)
+  (ok u0)
+;;   (contract-call? 'ST000000000000000000002AMW42H.swapr get-total-supply 'ST000000000000000000002AMW42H.plaid-token 'ST000000000000000000002AMW42H.stx-token)
 )
+
+(define-read-only (get-token-uri)
+  (ok (some u"https://swapr.finance/tokens/plaid-stx-token.json"))
+)
+
 
 ;; the extra mint method used by swapr
 ;; can only be used by swapr main contract
@@ -42,7 +50,7 @@
     (print "token-swapr.mint")
     (print contract-caller)
     (print amount)
-    (if (is-eq contract-caller 'ST3J2GVMMM2R07ZFBJDWTYEYAR8FZH5WKDTFJ9AHA.swapr)
+    (if (is-eq contract-caller 'ST000000000000000000002AMW42H.swapr)
       (ft-mint? token amount recipient)
       (err no-acccess-err)
     )
